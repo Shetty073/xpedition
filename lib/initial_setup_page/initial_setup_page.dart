@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/homepage/homepage.dart';
 import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
@@ -33,9 +34,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   TextEditingController _avgPriceOfOneNightAtHotelController =
       TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
-
   DatabaseHelper dbHelper;
   bool processing;
+  SharedPreferences myPref;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -44,24 +45,39 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
       processing = true;
     });
 
-    // first create the table user_data
-    await dbHelper.createUserdataTable();
+    // first create the table  and vehicle_data tables
+    await dbHelper.createUserDataTable();
+    await dbHelper.createVehicleDataTable();
 
     // Create a UserData obj and add it to the user_data table.
     final userData = UserData(
-      firstName: firstName,
-      lastName: lastName,
-      vehicleName: vehicleName,
-      maxKmInOneDay: maxKmInOneDay,
-      vehicleMileage: vehicleMileage,
-      fuelPricePerLitre: fuelPricePerLitre,
-      avgPriceOfOneMeal: avgPriceOfOneMeal,
-      avgPriceOfOneNightAtHotel: avgPriceOfOneNightAtHotel,
-      noOfMealsPerDay: noOfMealsPerDay);
-    await dbHelper.insertUserdata(userData);
+        firstName: firstName,
+        lastName: lastName,
+        maxKmInOneDay: maxKmInOneDay,
+        fuelPricePerLitre: fuelPricePerLitre,
+        avgPriceOfOneMeal: avgPriceOfOneMeal,
+        avgPriceOfOneNightAtHotel: avgPriceOfOneNightAtHotel,
+        noOfMealsPerDay: noOfMealsPerDay);
+
+    await dbHelper.insertUserData(userData);
+
+    // Create a UserData obj and add it to the user_data table.
+    final vehicleData =
+        VehicleData(vehicleName: vehicleName, vehicleMileage: vehicleMileage);
+
+    await dbHelper.insertVehicleData(vehicleData);
+  }
+
+  Future<void> _createFromToSuggestionList() async {
+    List<String> fromList = [];
+    List<String> toList = [];
+    await myPref.setStringList("fromList", fromList);
+    await myPref.setStringList("toList", toList);
   }
 
   void _submitData() {
+    _createFromToSuggestionList();
+
     this.firstName = _firstNameController.text;
     this.lastName = _lastNameController.text;
     this.vehicleName = _vehicleNameController.text;
@@ -74,10 +90,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     this.noOfMealsPerDay = int.parse(_noOfMealsPerDayController.text);
 
     _insertDataIntoDatabase();
-    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => HomePage()));
   }
-
-  SharedPreferences myPref;
 
   void initSharedPref() async {
     myPref = await SharedPreferences.getInstance();
@@ -85,7 +100,6 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     dbHelper = DatabaseHelper();
     processing = false;
@@ -140,6 +154,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _firstNameController,
                               decoration: InputDecoration(
                                 hintText: "First name",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               validator: (value) {
                                 if (value.trim().isEmpty) {
@@ -168,6 +185,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _lastNameController,
                               decoration: InputDecoration(
                                 hintText: "Last name",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               validator: (value) {
                                 if (value.trim().isEmpty) {
@@ -197,6 +217,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         controller: _vehicleNameController,
                         decoration: InputDecoration(
                           hintText: "Vehicle name",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
                         ),
                         validator: (value) {
                           if (value.trim().isEmpty) {
@@ -220,6 +243,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         controller: _maxKmInOneDayController,
                         decoration: InputDecoration(
                           hintText: "Max KM you can travel in a day",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
                         ),
                         inputFormatters: <TextInputFormatter>[
                           WhitelistingTextInputFormatter.digitsOnly
@@ -250,6 +276,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _vehicleMileageController,
                               decoration: InputDecoration(
                                 hintText: "Vehicle mileage",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               inputFormatters: <TextInputFormatter>[
                                 WhitelistingTextInputFormatter(
@@ -282,6 +311,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _fuelPricePerLitreController,
                               decoration: InputDecoration(
                                 hintText: "Fuel price/litre",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               inputFormatters: <TextInputFormatter>[
                                 WhitelistingTextInputFormatter(
@@ -319,6 +351,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _avgPriceOfOneMealController,
                               decoration: InputDecoration(
                                 hintText: "Avg. price of a meal",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               inputFormatters: <TextInputFormatter>[
                                 WhitelistingTextInputFormatter(
@@ -351,6 +386,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               controller: _avgPriceOfOneNightAtHotelController,
                               decoration: InputDecoration(
                                 hintText: "Price of hotel/night",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               inputFormatters: <TextInputFormatter>[
                                 WhitelistingTextInputFormatter(
@@ -384,6 +422,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         controller: _noOfMealsPerDayController,
                         decoration: InputDecoration(
                           hintText: "No. of meals/day",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
                         ),
                         inputFormatters: <TextInputFormatter>[
                           WhitelistingTextInputFormatter.digitsOnly
@@ -411,36 +452,35 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         children: <Widget>[
                           Flexible(
                             child: SizedBox(
-                                height: 0.075 * deviceHeight,
-                                width: 0.35 * deviceWidth,
-                                child: FlatButton(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .headline1
-                                      .color,
-                                  textColor: Colors.white,
-                                  splashColor: Theme.of(context)
-                                      .textTheme
-                                      .headline1
-                                      .color
-                                      .withAlpha(50),
-                                  onPressed: () {
-                                    if (_formKey.currentState.validate()) {
-                                      _submitData();
-                                    }
-                                    myPref.setBool("complete_init_setup", true);
-                                  },
-                                  child: Text(
-                                    "Submit",
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 0.04 * deviceWidth,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              height: 0.075 * deviceHeight,
+                              width: 0.35 * deviceWidth,
+                              child: FlatButton(
+                                color:
+                                    Theme.of(context).textTheme.headline1.color,
+                                textColor: Colors.white,
+                                splashColor: Theme.of(context)
+                                    .textTheme
+                                    .headline1
+                                    .color
+                                    .withAlpha(50),
+                                onPressed: () {
+                                  if (_formKey.currentState.validate()) {
+                                    _submitData();
+                                  }
+                                  myPref.setBool("complete_init_setup", true);
+                                },
+                                child: Text(
+                                  "Submit",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 0.04 * deviceWidth,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                )),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
+                            ),
                           ),
                           SizedBox(
                             width: 0.01 * deviceWidth,

@@ -5,6 +5,7 @@ import 'package:xpedition/homepage/views/settings_view.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xpedition/initial_setup_page/initial_setup_page.dart';
+import 'package:xpedition/create_new_plan/create_new_plan.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,7 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int currPageIndex;
-  SharedPreferences myPrefs;
+  SharedPreferences myPref;
 
   PageController _pageController = PageController(
     initialPage: 0,
@@ -23,7 +24,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       currPageIndex = index;
       if(currPageIndex == 1) {
-        if(!myPrefs.containsKey("complete_init_setup")) {
+        if(!myPref.containsKey("complete_init_setup")) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => InitialSetupPage()));
         }
       }
@@ -31,13 +32,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void initSharedPref() async {
-    myPrefs = await SharedPreferences.getInstance();
-    myPrefs.setBool("app_init", true);
+    myPref = await SharedPreferences.getInstance();
+    myPref.setBool("app_init", true);
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initSharedPref();
     currPageIndex = 0;
@@ -74,8 +74,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Icon(Icons.add),
           ),
           onPressed: () {
+            //TODO: 1. create designs for plans_view, settings_view(with stats) and create_new_plan. 2. implement designs one by one
             // go to create new plan page
-            //TODO: 1. create designs for plans_view, settings_view(with stats) and create_a_plan. 2. implement designs one by one
+            if(!myPref.containsKey("complete_init_setup")) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => InitialSetupPage()));
+            } else {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => CreateNewPlan(myPref: myPref,)));
+            }
           },
         ),
         bottomNavigationBar: BottomAppBar(
@@ -88,13 +93,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: <Widget>[
                 IconTheme(
                   data: IconThemeData(
-                    color: Theme.of(context).textTheme.bodyText2.color,
+                    color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
                     icon: currPageIndex == 0 ? Icon(Icons.home) : Icon(OMIcons.home),
                     iconSize: 0.08 * deviceWidth,
                     onPressed: () {
                       // plans list view
+
                       setState(() {
                         _pageController.animateToPage(0,
                             duration: Duration(milliseconds: 500),
@@ -105,7 +111,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 IconTheme(
                   data: IconThemeData(
-                    color: Theme.of(context).textTheme.bodyText2.color,
+                    color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
                     icon: currPageIndex == 1 ? Icon(Icons.person) : Icon(OMIcons.person),
