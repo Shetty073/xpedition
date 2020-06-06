@@ -2,30 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:xpedition/data_models/user_data.dart';
 
 class PlanFormViewTwo extends StatefulWidget {
-  final TextEditingController dateController, noOfDaysController;
+  final TextEditingController dateController, noOfDaysController, distanceController;
 
-  PlanFormViewTwo({@required this.dateController, @required this.noOfDaysController});
+  final List<UserData> myUserData;
+
+  PlanFormViewTwo(
+      {@required this.dateController, @required this.noOfDaysController, @required this.myUserData, @required this.distanceController});
 
   @override
   _PlanFormViewTwoState createState() => _PlanFormViewTwoState();
 }
 
 class _PlanFormViewTwoState extends State<PlanFormViewTwo> {
-
   Future _selectDate() async {
-    print("lol");
+    _totalTripDays();
     DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: new DateTime.now(),
-        firstDate: new DateTime(2020),
-        lastDate: new DateTime(2050));
+      context: context,
+      initialDate: new DateTime.now(),
+      firstDate: new DateTime(2020),
+      lastDate: new DateTime(2050),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFFFF8200),
+            accentColor: const Color(0xFFECA72C),
+            colorScheme: ColorScheme.light(
+              primary: const Color(0xFFFF8200),
+            ),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
+          ),
+          child: child,
+        );
+      },
+    );
     if (picked != null) {
       setState(() {
         widget.dateController.text = DateFormat("dd-MM-yyyy").format(picked);
       });
     }
+  }
+
+  void _totalTripDays() {
+    double tNoDays = (double.parse(widget.distanceController.text) / widget.myUserData[0].maxKmInOneDay);
+    String totalTripDays = tNoDays.toString();
+    List<String> decSplit;
+    decSplit = totalTripDays.split(".");
+    int preDec, postDec, totalDays;
+    preDec = int.parse(decSplit[0]);
+    postDec = int.parse(decSplit[1]);
+    if(postDec != 0) {
+      totalDays = preDec + 1;
+    } else {
+      totalDays = preDec;
+    }
+    setState(() {
+      widget.noOfDaysController.text = totalDays.toString();
+    });
   }
 
   @override
@@ -56,7 +93,8 @@ class _PlanFormViewTwoState extends State<PlanFormViewTwo> {
                   decoration: InputDecoration(
                     hintText: "Select trip start date",
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                      borderSide:
+                          BorderSide(color: Theme.of(context).primaryColor),
                     ),
                   ),
                   validator: (value) {
@@ -134,6 +172,9 @@ class _PlanFormViewTwoState extends State<PlanFormViewTwo> {
                 color: Theme.of(context).textTheme.bodyText1.color,
               ),
             ),
+            onTap: () {
+              _totalTripDays();
+            },
           ),
         ],
       ),

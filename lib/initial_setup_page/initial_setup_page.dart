@@ -34,20 +34,21 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   TextEditingController _avgPriceOfOneNightAtHotelController =
       TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
-  DatabaseHelper dbHelper;
-  bool processing;
+  DatabaseHelper _dbHelper;
+  bool _processing;
   SharedPreferences myPref;
 
   final _formKey = GlobalKey<FormState>();
 
   void _insertDataIntoDatabase() async {
     setState(() {
-      processing = true;
+      _processing = true;
     });
 
-    // first create the table  and vehicle_data tables
-    await dbHelper.createUserDataTable();
-    await dbHelper.createVehicleDataTable();
+    // first create the required tables
+    await _dbHelper.createUserDataTable();
+    await _dbHelper.createVehicleDataTable();
+    await _dbHelper.createNewPlanDataTable();
 
     // Create a UserData obj and add it to the user_data table.
     final userData = UserData(
@@ -59,13 +60,13 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
         avgPriceOfOneNightAtHotel: avgPriceOfOneNightAtHotel,
         noOfMealsPerDay: noOfMealsPerDay);
 
-    await dbHelper.insertUserData(userData);
+    await _dbHelper.insertUserData(userData);
 
     // Create a UserData obj and add it to the user_data table.
     final vehicleData =
         VehicleData(vehicleName: vehicleName, vehicleMileage: vehicleMileage);
 
-    await dbHelper.insertVehicleData(vehicleData);
+    await _dbHelper.insertVehicleData(vehicleData);
   }
 
   Future<void> _createFromToSuggestionList() async {
@@ -101,8 +102,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   @override
   void initState() {
     super.initState();
-    dbHelper = DatabaseHelper();
-    processing = false;
+    _dbHelper = DatabaseHelper();
+    _processing = false;
     initSharedPref();
   }
 
@@ -113,7 +114,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: processing
+        body: _processing
             ? ProcessingPage()
             : Container(
                 padding: EdgeInsets.fromLTRB(0.04 * deviceWidth,

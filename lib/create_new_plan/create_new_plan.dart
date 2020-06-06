@@ -5,6 +5,7 @@ import 'package:xpedition/create_new_plan/views/plan_form_view_two.dart';
 import 'package:xpedition/create_new_plan/views/plan_form_view_three.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 
@@ -20,6 +21,7 @@ class CreateNewPlan extends StatefulWidget {
 class _CreateNewPlanState extends State<CreateNewPlan> {
   DatabaseHelper _myDbHelper;
   List<VehicleData> _myVehicleData;
+  List<UserData> _myUserData;
   int currPageIndex;
 
   TextEditingController _fromLocationController,
@@ -47,6 +49,10 @@ class _CreateNewPlanState extends State<CreateNewPlan> {
     _myVehicleData = await _myDbHelper.getVehicleData();
   }
 
+  void _getUserDataDetails() async {
+    _myUserData = await _myDbHelper.getUserData();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +67,7 @@ class _CreateNewPlanState extends State<CreateNewPlan> {
     _fuelCostController = TextEditingController();
     _myDbHelper = DatabaseHelper();
     _myVehicleData = [];
+    _myUserData = [];
   }
 
   @override
@@ -126,14 +133,20 @@ class _CreateNewPlanState extends State<CreateNewPlan> {
                       PlanFormViewTwo(
                         dateController: _dateController,
                         noOfDaysController: _noOfDaysController,
+                        distanceController: _distanceController,
+                        myUserData: _myUserData,
                       ),
                       PlanFormViewThree(
                         fromLocationController: _fromLocationController,
                         toLocationController: _toLocationController,
+                        distanceController: _distanceController,
+                        dateController: _dateController,
+                        noOfDaysController: _noOfDaysController,
                         vehicleNameController: _vehicleNameController,
                         fuelMileageController: _fuelMileageController,
                         fuelCostController: _fuelCostController,
                         myVehicleData: _myVehicleData,
+                        myUserData: _myUserData,
                         myFormKey: _formKey,
                         myPref: widget.myPref,
                       ),
@@ -182,6 +195,7 @@ class _CreateNewPlanState extends State<CreateNewPlan> {
                                             .isNotEmpty) {
                                       setState(() {
                                         _getVehicleDetails();
+                                        _getUserDataDetails();
                                         _pageController.animateToPage(
                                             ++currPageIndex,
                                             duration:

@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xpedition/data_models/new_plan_data.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/homepage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
+import 'package:xpedition/data_models/user_data.dart';
 
 class PlanFormViewThree extends StatefulWidget {
   final TextEditingController fromLocationController,
       toLocationController,
+      distanceController,
+      dateController,
+      noOfDaysController,
       vehicleNameController,
       fuelMileageController,
       fuelCostController;
 
   final List<VehicleData> myVehicleData;
+
+  final List<UserData> myUserData;
 
   final myFormKey;
 
@@ -21,10 +29,14 @@ class PlanFormViewThree extends StatefulWidget {
   PlanFormViewThree(
       {@required this.fromLocationController,
       @required this.toLocationController,
+      @required this.distanceController,
+      @required this.dateController,
+      @required this.noOfDaysController,
       @required this.vehicleNameController,
       @required this.fuelMileageController,
       @required this.fuelCostController,
       @required this.myVehicleData,
+      @required this.myUserData,
       @required this.myFormKey,
       @required this.myPref});
 
@@ -33,6 +45,7 @@ class PlanFormViewThree extends StatefulWidget {
 }
 
 class _PlanFormViewThreeState extends State<PlanFormViewThree> {
+  DatabaseHelper _dbHelper;
   String _value;
 
   List<DropdownMenuItem> _dropDownMenuItems() {
@@ -52,6 +65,11 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     return dropdowmMenuItems;
   }
 
+  // Automatically set the vehicle mileage from myVehicleData, a VehicleData
+  // object which was passed to this view.
+  // myVehicleData contains the vehicleData provided on completion of InitialSetup.
+  // It may also contain additional VehicleData of other vehicles owned by the user
+  // added to the database by the user after completion of InitialSetup.
   void _setVehicleMileage(String value) {
     for (int i = 0; i < widget.myVehicleData.length; i++) {
       if (widget.myVehicleData[i].vehicleName == value) {
@@ -61,6 +79,16 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     }
   }
 
+  // Automatically set the fuel price from myUserData, a UserData object which was
+  // passed to this view.
+  // myUserData contains the UserData provided on completion of InitialSetup.
+  void _setFuelPricePerLitre() {
+    widget.fuelCostController.text =
+        widget.myUserData[0].fuelPricePerLitre.toString();
+  }
+
+  // On Cancel button press display AlertDialog asking whether to cancel adn go back.
+  // This is to prevent accidental press of Cancel button
   void _displayCancelAlert(double deviceWidth, double deviceHeight) {
     showDialog(
         context: context,
@@ -128,7 +156,7 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
         });
   }
 
-  // for SimpleAutoCompleteTextField suggestions
+  // SharedPreference operations: for SimpleAutoCompleteTextField suggestions
   List<String> _getFromList() {
     return widget.myPref.getStringList("fromList");
   }
@@ -145,7 +173,42 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     return await widget.myPref.setStringList("toList", myList);
   }
 
+  // Save data to database
+  NewPlanData _prepareDataForInsertion() {
+    double fuelRequired = (double.parse(widget.distanceController.text) /
+        double.parse(widget.fuelMileageController.text));
+    double rideFuelExpense =
+        fuelRequired * widget.myUserData[0].fuelPricePerLitre;
+    double rideFoodExpense = (int.parse(widget.noOfDaysController.text) *
+            (widget.myUserData[0].noOfMealsPerDay)) *
+        (widget.myUserData[0].avgPriceOfOneMeal);
+    double rideHotelExpense = widget.myUserData[0].avgPriceOfOneNightAtHotel *
+        int.parse(widget.noOfDaysController.text);
+    double totalRideExpense =
+        rideFoodExpense + rideFuelExpense + rideHotelExpense;
+    return NewPlanData(
+      source: widget.toLocationController.text,
+      destination: widget.fromLocationController.text,
+      totalDistance: double.parse(widget.distanceController.text),
+      totalNoOfDays: int.parse(widget.noOfDaysController.text),
+      totalRideHotelExpense: rideHotelExpense,
+      totalRideFoodExpense: rideFoodExpense,
+      vehicleMileage: double.parse(widget.fuelMileageController.text),
+      totalRideFuelRequired: fuelRequired,
+      totalRideFuelCost: rideFuelExpense,
+      totalRideExpense: totalRideExpense,
+    );
+  }
+
+  void _insertDataIntoDatabase() async {
+    // insertNewPlanData() requires a NewPlanData object as parameter
+    // _prepareDataForInsertion() will return a NewPlanData object
+    NewPlanData newPlanData = _prepareDataForInsertion();
+    await _dbHelper.insertNewPlanData(newPlanData);
+  }
+
   void _submitData() {
+    // SharedPreferences stuff
     // Set from and to locations ins SharedPreferences list for suggestions
     List<String> fromList = _getFromList();
     fromList.add(widget.fromLocationController.text);
@@ -156,7 +219,19 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     _setFromList(fromList);
     _setToList(toList);
 
-    //TODO: submit data to database
+    // Sqlite DB stuff
+    _insertDataIntoDatabase();
+    // Go to home page
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => HomePage()));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setFuelPricePerLitre();
+    // Initialize DatabaseHelper before page load
+    _dbHelper = DatabaseHelper();
   }
 
   @override
