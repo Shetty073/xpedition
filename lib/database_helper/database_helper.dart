@@ -1,9 +1,13 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:xpedition/data_models/new_plan_data.dart';
+import 'file:///D:/Git%20Projects/xpedition/lib/data_models/with_id/new_plan_data_with_id.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/data_models/user_data.dart';
 import 'package:path/path.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'dart:async';
+
+import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 
 class DatabaseHelper {
   Future<Database> database;
@@ -34,18 +38,19 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<UserData>> getUserData() async {
+  Future<List<UserDataWithId>> getUserData() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> userDataMaps = await db.query('user_data');
-    return List.generate(userDataMaps.length, (i) {
-      return UserData(
-        firstName: userDataMaps[i]['firstName'],
-        lastName: userDataMaps[i]['lastName'],
-        maxKmInOneDay: userDataMaps[i]['maxKmInOneDay'],
-        fuelPricePerLitre: userDataMaps[i]['fuelPricePerLitre'],
-        avgPriceOfOneMeal: userDataMaps[i]['avgPriceOfOneMeal'],
-        avgPriceOfOneNightAtHotel: userDataMaps[i]['avgPriceOfOneNightAtHotel'],
-        noOfMealsPerDay: userDataMaps[i]['noOfMealsPerDay'],
+    final List<Map<String, dynamic>> userDataMapsWithId = await db.query('user_data');
+    return List.generate(userDataMapsWithId.length, (i) {
+      return UserDataWithId(
+        id: userDataMapsWithId[i]['id'],
+        firstName: userDataMapsWithId[i]['firstName'],
+        lastName: userDataMapsWithId[i]['lastName'],
+        maxKmInOneDay: userDataMapsWithId[i]['maxKmInOneDay'],
+        fuelPricePerLitre: userDataMapsWithId[i]['fuelPricePerLitre'],
+        avgPriceOfOneMeal: userDataMapsWithId[i]['avgPriceOfOneMeal'],
+        avgPriceOfOneNightAtHotel: userDataMapsWithId[i]['avgPriceOfOneNightAtHotel'],
+        noOfMealsPerDay: userDataMapsWithId[i]['noOfMealsPerDay'],
       );
     });
   }
@@ -65,14 +70,15 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<VehicleData>> getVehicleData() async {
+  Future<List<VehicleDataWithId>> getVehicleData() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> vehicleDataMaps =
+    final List<Map<String, dynamic>> vehicleDataMapsWithId =
         await db.query('vehicle_data');
-    return List.generate(vehicleDataMaps.length, (i) {
-      return VehicleData(
-        vehicleName: vehicleDataMaps[i]['vehicleName'],
-        vehicleMileage: vehicleDataMaps[i]['vehicleMileage'],
+    return List.generate(vehicleDataMapsWithId.length, (i) {
+      return VehicleDataWithId(
+        id: vehicleDataMapsWithId[i]['id'],
+        vehicleName: vehicleDataMapsWithId[i]['vehicleName'],
+        vehicleMileage: vehicleDataMapsWithId[i]['vehicleMileage'],
       );
     });
   }
@@ -80,7 +86,7 @@ class DatabaseHelper {
   Future<void> createNewPlanDataTable() async {
     final Database db = await database;
     db.execute(
-        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
   }
 
   Future<void> insertNewPlanData(NewPlanData newPlanData) async {
@@ -92,22 +98,24 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<NewPlanData>> getNewPlanData() async {
+  Future<List<NewPlanDataWithId>> getNewPlanData() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> newPlanDataMaps =
-        await db.query('vehicle_data');
-    return List.generate(newPlanDataMaps.length, (i) {
-      return NewPlanData(
-        source: newPlanDataMaps[i]['source'],
-        destination: newPlanDataMaps[i]['destination'],
-        totalDistance: newPlanDataMaps[i]['totalDistance'],
-        totalNoOfDays: newPlanDataMaps[i]['totalNoOfDays'],
-        totalRideHotelExpense: newPlanDataMaps[i]['totalRideHotelExpense'],
-        totalRideFoodExpense: newPlanDataMaps[i]['totalRideFoodExpense'],
-        vehicleMileage: newPlanDataMaps[i]['vehicleMileage'],
-        totalRideFuelRequired: newPlanDataMaps[i]['totalRideFuelRequired'],
-        totalRideFuelCost: newPlanDataMaps[i]['totalRideFuelCost'],
-        totalRideExpense: newPlanDataMaps[i]['totalRideExpense'],
+    final List<Map<String, dynamic>> newPlanDataMapsWithId =
+        await db.query('new_plan_data');
+    return List.generate(newPlanDataMapsWithId.length, (i) {
+      return NewPlanDataWithId(
+        id: newPlanDataMapsWithId[i]['id'],
+        source: newPlanDataMapsWithId[i]['source'],
+        destination: newPlanDataMapsWithId[i]['destination'],
+        beginDate: newPlanDataMapsWithId[i]['beginDate'],
+        totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
+        totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
+        vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
+        totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
       );
     });
   }

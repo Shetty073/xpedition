@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xpedition/data_models/new_plan_data.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/homepage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/data_models/user_data.dart';
 
 class PlanFormViewThree extends StatefulWidget {
@@ -18,9 +19,9 @@ class PlanFormViewThree extends StatefulWidget {
       fuelMileageController,
       fuelCostController;
 
-  final List<VehicleData> myVehicleData;
+  final List<VehicleDataWithId> myVehicleData;
 
-  final List<UserData> myUserData;
+  final List<UserDataWithId> myUserData;
 
   final myFormKey;
 
@@ -114,8 +115,8 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
                   splashColor:
                       Theme.of(context).textTheme.headline1.color.withAlpha(50),
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                   },
                   child: Text(
                     "Yes",
@@ -175,21 +176,31 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
 
   // Save data to database
   NewPlanData _prepareDataForInsertion() {
-    double fuelRequired = (double.parse(widget.distanceController.text) /
-        double.parse(widget.fuelMileageController.text));
-    double rideFuelExpense =
-        fuelRequired * widget.myUserData[0].fuelPricePerLitre;
-    double rideFoodExpense = (int.parse(widget.noOfDaysController.text) *
-            (widget.myUserData[0].noOfMealsPerDay)) *
-        (widget.myUserData[0].avgPriceOfOneMeal);
-    double rideHotelExpense = widget.myUserData[0].avgPriceOfOneNightAtHotel *
-        int.parse(widget.noOfDaysController.text);
-    double totalRideExpense =
-        rideFoodExpense + rideFuelExpense + rideHotelExpense;
+    double totalDistance = double.parse((double.parse(widget.distanceController.text)).toStringAsFixed(2));
+    double fuelRequired = double.parse(
+        (totalDistance /
+                double.parse(widget.fuelMileageController.text))
+            .toStringAsFixed(2));
+    double rideFuelExpense = double.parse(
+        (fuelRequired * widget.myUserData[0].fuelPricePerLitre)
+            .toStringAsFixed(2));
+    double rideFoodExpense = double.parse(
+        ((int.parse(widget.noOfDaysController.text) *
+                    (widget.myUserData[0].noOfMealsPerDay)) *
+                (widget.myUserData[0].avgPriceOfOneMeal))
+            .toStringAsFixed(2));
+    double rideHotelExpense = double.parse(
+        (widget.myUserData[0].avgPriceOfOneNightAtHotel *
+                int.parse(widget.noOfDaysController.text))
+            .toStringAsFixed(2));
+    double totalRideExpense = double.parse(
+        (rideFoodExpense + rideFuelExpense + rideHotelExpense)
+            .toStringAsFixed(2));
     return NewPlanData(
-      source: widget.toLocationController.text,
-      destination: widget.fromLocationController.text,
-      totalDistance: double.parse(widget.distanceController.text),
+      source: widget.fromLocationController.text,
+      destination: widget.toLocationController.text,
+      beginDate: widget.dateController.text,
+      totalDistance: totalDistance,
       totalNoOfDays: int.parse(widget.noOfDaysController.text),
       totalRideHotelExpense: rideHotelExpense,
       totalRideFoodExpense: rideFoodExpense,
@@ -204,7 +215,10 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     // insertNewPlanData() requires a NewPlanData object as parameter
     // _prepareDataForInsertion() will return a NewPlanData object
     NewPlanData newPlanData = _prepareDataForInsertion();
-    await _dbHelper.insertNewPlanData(newPlanData);
+    _dbHelper.insertNewPlanData(newPlanData).then((value) =>
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => HomePage())));
+    Navigator.pop(context);
   }
 
   void _submitData() {
@@ -221,9 +235,6 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
 
     // Sqlite DB stuff
     _insertDataIntoDatabase();
-    // Go to home page
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 
   @override

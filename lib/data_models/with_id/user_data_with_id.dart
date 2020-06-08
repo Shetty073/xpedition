@@ -1,16 +1,15 @@
 import 'package:flutter/cupertino.dart';
 
-class UserData {
-  final String firstName;
-  final String lastName;
-  final int maxKmInOneDay;
-  final double fuelPricePerLitre;
-  final double avgPriceOfOneMeal;
-  final double avgPriceOfOneNightAtHotel;
-  final int noOfMealsPerDay;
+// This class is specifically created for us to retrieve the INTEGER id (which is
+// the PRIMARY KEY of our table) along with other data.
+class UserDataWithId {
+  final int id, maxKmInOneDay, noOfMealsPerDay;
+  final String firstName, lastName;
+  final double fuelPricePerLitre, avgPriceOfOneMeal, avgPriceOfOneNightAtHotel;
 
-  UserData(
-      {@required this.firstName,
+  UserDataWithId(
+      {@required this.id,
+      @required this.firstName,
       @required this.lastName,
       @required this.maxKmInOneDay,
       @required this.fuelPricePerLitre,
@@ -20,6 +19,7 @@ class UserData {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'firstName': firstName,
       'lastName': lastName,
       'maxKmInOneDay': maxKmInOneDay,
@@ -29,5 +29,4 @@ class UserData {
       'noOfMealsPerDay': noOfMealsPerDay,
     };
   }
-
 }

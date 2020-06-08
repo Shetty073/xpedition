@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:xpedition/data_models/user_data.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 
 class PlanFormViewTwo extends StatefulWidget {
   final TextEditingController dateController, noOfDaysController, distanceController;
 
-  final List<UserData> myUserData;
+  final List<UserDataWithId> myUserData;
 
   PlanFormViewTwo(
       {@required this.dateController, @required this.noOfDaysController, @required this.myUserData, @required this.distanceController});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 final lightTheme = ThemeData.light().copyWith(
-  scaffoldBackgroundColor: Color(0xFFFDFDFD),
+  scaffoldBackgroundColor: Color(0xFFEEEFF0),
   primaryColor: Color(0xFFFF8200),
   accentColor: Color(0xFFECA72C),
   splashColor: Color(0xFFECA72C),
@@ -16,6 +16,12 @@ final lightTheme = ThemeData.light().copyWith(
     headline3: TextStyle(
       color: Colors.white,
     ),
+    headline4: TextStyle(
+      color: Color(0xFFF5F5F5),
+    ),
+    headline5: TextStyle(
+      color: Color(0xFF9E9E9E),
+    ),
     bodyText1: TextStyle(
       color: Colors.black,
     ),
@@ -26,7 +32,7 @@ final lightTheme = ThemeData.light().copyWith(
 );
 
 final darkTheme = ThemeData.dark().copyWith(
-  scaffoldBackgroundColor: Color(0xFF1F2227),
+  scaffoldBackgroundColor: Color(0xFF252525),
   primaryColor: Color(0xFFFF8200),
   accentColor: Color(0xFFECA72C),
   splashColor: Color(0xFFECA72C),
@@ -41,11 +47,18 @@ final darkTheme = ThemeData.dark().copyWith(
     headline3: TextStyle(
       color: Colors.white,
     ),
+    headline4: TextStyle(
+      color: Color(0xFF1B1B1B),
+    ),
+    headline5: TextStyle(
+      color: Color(0xFF1B1B1B),
+    ),
     bodyText1: TextStyle(
       color: Colors.white,
     ),
     bodyText2: TextStyle(
       color: Colors.white,
     ),
+
   ),
 );

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:xpedition/homepage/views/plans_view.dart';
 import 'package:xpedition/homepage/views/settings_view.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
@@ -23,9 +24,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void pageChanged(int index) {
     setState(() {
       currPageIndex = index;
-      if(currPageIndex == 1) {
-        if(!myPref.containsKey("complete_init_setup")) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => InitialSetupPage()));
+      if (currPageIndex == 1) {
+        if (!myPref.containsKey("complete_init_setup")) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => InitialSetupPage()));
         }
       }
     });
@@ -51,6 +53,60 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          title: Text(
+            "Xpedition",
+            style: GoogleFonts.montserrat(
+              textStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0.0,
+          actions: <Widget>[
+            GestureDetector(
+              onTap: () {
+                // TODO: goto finished trips page
+
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                    width: 0.001 * deviceWidth,
+                  ),
+                ),
+                padding: EdgeInsets.only(right: 0.015 * deviceWidth, top: 0.0, bottom: 0.0, left: 0.015 * deviceWidth),
+                margin: EdgeInsets.only(right: 0.015 * deviceWidth, top: 0.03 * deviceWidth, bottom: 0.03 * deviceWidth),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      "Completed",
+                      style: GoogleFonts.montserrat(
+                        textStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    IconTheme(
+                      data: IconThemeData(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      child: Icon(
+                        Icons.archive,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
         body: PageView(
           controller: _pageController,
           scrollDirection: Axis.horizontal,
@@ -74,12 +130,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Icon(Icons.add),
           ),
           onPressed: () {
-            //TODO: 1. create designs for plans_view, settings_view(with stats) and create_new_plan. 2. implement designs one by one
             // go to create new plan page
-            if(!myPref.containsKey("complete_init_setup")) {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => InitialSetupPage()));
+            if (!myPref.containsKey("complete_init_setup")) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => InitialSetupPage()));
             } else {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CreateNewPlan(myPref: myPref,)));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CreateNewPlan(
+                            myPref: myPref,
+                          )));
             }
           },
         ),
@@ -87,7 +148,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           shape: CircularNotchedRectangle(),
           notchMargin: 4.0,
           child: Container(
-            padding: EdgeInsets.only(left: 0.15 * deviceWidth, right: 0.15 * deviceWidth),
+            padding: EdgeInsets.only(
+                left: 0.15 * deviceWidth, right: 0.15 * deviceWidth),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -96,7 +158,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
-                    icon: currPageIndex == 0 ? Icon(Icons.home) : Icon(OMIcons.home),
+                    icon: currPageIndex == 0
+                        ? Icon(Icons.home)
+                        : Icon(OMIcons.home),
                     iconSize: 0.08 * deviceWidth,
                     onPressed: () {
                       // plans list view
@@ -114,7 +178,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
-                    icon: currPageIndex == 1 ? Icon(Icons.person) : Icon(OMIcons.person),
+                    icon: currPageIndex == 1
+                        ? Icon(Icons.person)
+                        : Icon(OMIcons.person),
                     iconSize: 0.08 * deviceWidth,
                     onPressed: () {
                       // settings view
@@ -135,4 +201,3 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 }
-

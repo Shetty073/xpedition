@@ -24,6 +24,10 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   double avgPriceOfOneNightAtHotel;
   int noOfMealsPerDay;
 
+  DatabaseHelper _dbHelper = DatabaseHelper();
+  SharedPreferences myPref;
+  bool _processing = false;
+
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
   TextEditingController _vehicleNameController = TextEditingController();
@@ -34,9 +38,6 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   TextEditingController _avgPriceOfOneNightAtHotelController =
       TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
-  DatabaseHelper _dbHelper;
-  bool _processing;
-  SharedPreferences myPref;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -45,6 +46,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
       _processing = true;
     });
 
+    // NOTE: Any and all tables for our app must be created here itself
     // first create the required tables
     await _dbHelper.createUserDataTable();
     await _dbHelper.createVehicleDataTable();
@@ -91,8 +93,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     this.noOfMealsPerDay = int.parse(_noOfMealsPerDayController.text);
 
     _insertDataIntoDatabase();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomePage()), result: false);
   }
 
   void initSharedPref() async {
@@ -102,8 +104,6 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   @override
   void initState() {
     super.initState();
-    _dbHelper = DatabaseHelper();
-    _processing = false;
     initSharedPref();
   }
 

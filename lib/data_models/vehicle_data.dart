@@ -9,7 +9,7 @@ class VehicleData {
   Map<String, dynamic> toMap() {
     return {
       'vehicleName': vehicleName,
-      'vehicleMileage': vehicleMileage
+      'vehicleMileage': vehicleMileage,
     };
   }
 

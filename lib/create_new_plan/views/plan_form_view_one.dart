@@ -37,7 +37,7 @@ class _PlanFormViewOneState extends State<PlanFormViewOne> {
     return widget.myPref.getStringList("toList");
   }
 
-  //TODO: Error text not working for some reason
+  //FIXME: Error text not working for some reason
   void _onFromFocusChange() {
     if (!_fromFocusNode.hasFocus) {
       if (widget.fromLocationController.text.trim().isEmpty) {
@@ -52,7 +52,6 @@ class _PlanFormViewOneState extends State<PlanFormViewOne> {
     }
   }
 
-  //TODO: Error text not working for some reason
   void _onToFocusChange() {
     if (!_toFocusNode.hasFocus) {
       if (widget.toLocationController.text.trim().isEmpty) {

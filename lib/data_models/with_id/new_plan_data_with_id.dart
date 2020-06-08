@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 
-class NewPlanData {
+// This class is specifically created for us to retrieve the INTEGER id (which is
+// the PRIMARY KEY of our table) along with other data.
+class NewPlanDataWithId {
+  final int id;
   final String source, destination, beginDate;
   final double totalDistance,
       totalRideHotelExpense,
@@ -11,8 +14,9 @@ class NewPlanData {
       totalRideExpense;
   final int totalNoOfDays;
 
-  NewPlanData(
-      {@required this.source,
+  NewPlanDataWithId(
+      {@required this.id,
+        @required this.source,
         @required this.destination,
         @required this.beginDate,
         @required this.totalDistance,
@@ -26,6 +30,7 @@ class NewPlanData {
 
   Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "source": source,
       "destination": destination,
       "beginDate": beginDate,
