@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 // the PRIMARY KEY of our table) along with other data.
 class NewPlanDataWithId {
   final int id;
-  final String source, destination, beginDate;
+  final String source, destination, beginDate, vehicleName;
   final double totalDistance,
       totalRideHotelExpense,
       totalRideFoodExpense,
@@ -16,17 +16,18 @@ class NewPlanDataWithId {
 
   NewPlanDataWithId(
       {@required this.id,
-        @required this.source,
-        @required this.destination,
-        @required this.beginDate,
-        @required this.totalDistance,
-        @required this.totalNoOfDays,
-        @required this.totalRideHotelExpense,
-        @required this.totalRideFoodExpense,
-        @required this.vehicleMileage,
-        @required this.totalRideFuelRequired,
-        @required this.totalRideFuelCost,
-        @required this.totalRideExpense});
+      @required this.source,
+      @required this.destination,
+      @required this.beginDate,
+      @required this.totalDistance,
+      @required this.totalNoOfDays,
+      @required this.totalRideHotelExpense,
+      @required this.totalRideFoodExpense,
+      @required this.vehicleName,
+      @required this.vehicleMileage,
+      @required this.totalRideFuelRequired,
+      @required this.totalRideFuelCost,
+      @required this.totalRideExpense});
 
   Map<String, dynamic> toMap() {
     return {
@@ -38,6 +39,7 @@ class NewPlanDataWithId {
       "totalNoOfDays": totalNoOfDays,
       "totalRideHotelExpense": totalRideHotelExpense,
       "totalRideFoodExpense": totalRideFoodExpense,
+      "vehicleName": vehicleName,
       "vehicleMileage": vehicleMileage,
       "totalRideFuelRequired": totalRideFuelRequired,
       "totalRideFuelCost": totalRideFuelCost,

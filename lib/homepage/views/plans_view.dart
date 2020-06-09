@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/views/query_helper/query_helper.dart';
 import 'package:xpedition/homepage/views/widgets/plan_card.dart';
 
 class PlansView extends StatefulWidget {
+
   @override
   _PlansViewState createState() => _PlansViewState();
 }
@@ -38,6 +41,7 @@ class _PlansViewState extends State<PlansView> {
     });
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -56,9 +60,9 @@ class _PlansViewState extends State<PlansView> {
           top: 0.025 * deviceWidth,
           bottom: 0.025 * deviceWidth),
       child: FutureBuilder(
-        future: _queryHelper.getDataFromDatabase(),
+        future: _queryHelper.getNewPlanDataFromDatabase(),
         builder: (context, snapshot) {
-          return (snapshot.hasData) ? ListView.builder(
+          return (snapshot.hasData) ? ((snapshot.data.length > 0) ? ListView.builder(
             itemCount: snapshot.data.length,
             itemBuilder: (context, i) {
               return PlanCard(
@@ -94,7 +98,7 @@ class _PlansViewState extends State<PlansView> {
                 ),
               ],
             ),
-          );
+          )) : SpinKitWave(color: Theme.of(context).primaryColor, size: 0.1 * deviceWidth,);
         },
       ),
     ) : Center(

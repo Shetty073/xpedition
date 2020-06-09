@@ -51,6 +51,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     await _dbHelper.createUserDataTable();
     await _dbHelper.createVehicleDataTable();
     await _dbHelper.createNewPlanDataTable();
+    await _dbHelper.createActivePlanDataTable();
 
     // Create a UserData obj and add it to the user_data table.
     final userData = UserData(
@@ -81,9 +82,9 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   void _submitData() {
     _createFromToSuggestionList();
 
-    this.firstName = _firstNameController.text;
-    this.lastName = _lastNameController.text;
-    this.vehicleName = _vehicleNameController.text;
+    this.firstName = _firstNameController.text.trim();
+    this.lastName = _lastNameController.text.trim();
+    this.vehicleName = _vehicleNameController.text.trim();
     this.maxKmInOneDay = int.parse(_maxKmInOneDayController.text);
     this.vehicleMileage = double.parse(_vehicleMileageController.text);
     this.fuelPricePerLitre = double.parse(_fuelPricePerLitreController.text);

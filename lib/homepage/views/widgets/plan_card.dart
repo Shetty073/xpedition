@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'file:///D:/Git%20Projects/xpedition/lib/data_models/with_id/new_plan_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/views/widgets/vertical_divider.dart';
+import 'package:xpedition/view_edit_plan_page/view_edit_plan_page.dart';
 
 class PlanCard extends StatefulWidget {
   final NewPlanDataWithId newPlanDataWithId;
-
   final String source, destination, beginDate;
-
   final int hrs, mins, days;
-
   final double totalDistance;
 
   PlanCard(
@@ -27,13 +28,44 @@ class PlanCard extends StatefulWidget {
 }
 
 class _PlanCardState extends State<PlanCard> {
+  DatabaseHelper _myDbHelper;
+
+  Future<List<VehicleDataWithId>> _getVehicleDataWithIdList() async {
+    List<VehicleDataWithId> _vehicleDataWithIdList = [];
+    _vehicleDataWithIdList = await _myDbHelper.getVehicleData();
+    return _vehicleDataWithIdList;
+  }
+
+  Future<UserDataWithId> _getUserDataWithId() async {
+    List<UserDataWithId> _userDataWithIdList = [];
+    _userDataWithIdList = await _myDbHelper.getUserData();
+    return _userDataWithIdList[0];
+  }
+
+  void _openViewEditPlanPage(List<VehicleDataWithId> vehicleDataWithIdList) {
+    _getUserDataWithId().then((value) => Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ViewEditPlanPage(
+              newPlanDataWithId: widget.newPlanDataWithId,
+              userDataWithId: value,
+              vehicleDataWithIdList: vehicleDataWithIdList,
+            ))));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _myDbHelper = DatabaseHelper();
+  }
+
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
-        print(widget.newPlanDataWithId.id);
+        _getVehicleDataWithIdList().then((value) => _openViewEditPlanPage(value));
       },
       child: Container(
         height: 0.14 * deviceHeight,

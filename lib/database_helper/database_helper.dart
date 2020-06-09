@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:xpedition/data_models/new_plan_data.dart';
-import 'file:///D:/Git%20Projects/xpedition/lib/data_models/with_id/new_plan_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/data_models/user_data.dart';
 import 'package:path/path.dart';
@@ -86,7 +86,7 @@ class DatabaseHelper {
   Future<void> createNewPlanDataTable() async {
     final Database db = await database;
     db.execute(
-        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
   }
 
   Future<void> insertNewPlanData(NewPlanData newPlanData) async {
@@ -112,6 +112,7 @@ class DatabaseHelper {
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
         totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
+        vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
         totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
         totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
@@ -119,4 +120,43 @@ class DatabaseHelper {
       );
     });
   }
+
+  Future<void> createActivePlanDataTable() async {
+    final Database db = await database;
+    db.execute(
+        "CREATE TABLE active_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+  }
+
+  Future<void> insertActivePlanData(NewPlanData newPlanData) async {
+    final Database db = await database;
+    await db.insert(
+      'active_plan_data',
+      newPlanData.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<NewPlanDataWithId>> getActivePlanData() async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> newPlanDataMapsWithId =
+    await db.query('active_plan_data');
+    return List.generate(newPlanDataMapsWithId.length, (i) {
+      return NewPlanDataWithId(
+        id: newPlanDataMapsWithId[i]['id'],
+        source: newPlanDataMapsWithId[i]['source'],
+        destination: newPlanDataMapsWithId[i]['destination'],
+        beginDate: newPlanDataMapsWithId[i]['beginDate'],
+        totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
+        totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
+        vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
+        vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
+        totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
+      );
+    });
+  }
+
 }
