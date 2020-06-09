@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:xpedition/data_models/new_plan_data.dart';
 import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
@@ -13,7 +14,10 @@ class ViewEditPlanPage extends StatefulWidget {
   final UserDataWithId userDataWithId;
   final List<VehicleDataWithId> vehicleDataWithIdList;
 
-  ViewEditPlanPage({@required this.newPlanDataWithId, @required this.userDataWithId, @required this.vehicleDataWithIdList});
+  ViewEditPlanPage(
+      {@required this.newPlanDataWithId,
+      @required this.userDataWithId,
+      @required this.vehicleDataWithIdList});
 
   @override
   _ViewEditPlanPageState createState() => _ViewEditPlanPageState();
@@ -43,6 +47,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
   TextEditingController _hotelCostEditingController = TextEditingController();
   TextEditingController _totalHotelExpenseEditingController =
       TextEditingController();
+  TextEditingController _totalRideExpenseController = TextEditingController();
   bool _toggleEdit = false;
 
   String _value;
@@ -70,22 +75,63 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     _toEditingController.text = widget.newPlanDataWithId.destination;
     _dateEditingController.text = widget.newPlanDataWithId.beginDate;
     _distanceEditingController.text =
-        widget.newPlanDataWithId.totalDistance.toString();
+        widget.newPlanDataWithId.totalDistance.toStringAsFixed(2);
     _timeEditingController.text =
         "${getHours(widget.newPlanDataWithId.totalDistance)} hrs ${getMins(widget.newPlanDataWithId.totalDistance)} mins";
     _daysEditingController.text =
-        "${widget.newPlanDataWithId.totalNoOfDays} ${widget.newPlanDataWithId.totalNoOfDays > 1 ? "days" : "day"}";
+        widget.newPlanDataWithId.totalNoOfDays.toString();
     _distanceEditingController.addListener(() {
-      _updateTripTime(double.parse(_distanceEditingController.text));
-      _updateTripDays(double.parse(_distanceEditingController.text));
+      _updateTripTime();
+      _updateTripDays();
+    });
+    _daysEditingController.addListener(() {
+      _updateTotalHotelExpense();
     });
 
     // Fuel card
     _value = widget.newPlanDataWithId.vehicleName;
-    _mileageEditingController.text = widget.newPlanDataWithId.vehicleMileage.toString();
-    _fuelPerUnitCostEditingController.text = widget.userDataWithId.fuelPricePerLitre.toString();
-    _totalFuelRequiredEditingController.text = widget.newPlanDataWithId.totalRideFuelRequired.toString();
-    _totalFuelExpenseEditingController.text = widget.newPlanDataWithId.totalRideFuelCost.toString();
+    _mileageEditingController.text =
+        widget.newPlanDataWithId.vehicleMileage.toStringAsFixed(2);
+    _fuelPerUnitCostEditingController.text =
+        widget.userDataWithId.fuelPricePerLitre.toStringAsFixed(2);
+    _totalFuelRequiredEditingController.text =
+        widget.newPlanDataWithId.totalRideFuelRequired.toStringAsFixed(2);
+    _totalFuelExpenseEditingController.text =
+        widget.newPlanDataWithId.totalRideFuelCost.toStringAsFixed(2);
+    _fuelPerUnitCostEditingController.addListener(() {
+      _updateFuelData();
+      _updateTotalRideExpense();
+    });
+
+    // Meal card
+    _singleMealExpenseEditingController.text =
+        widget.userDataWithId.avgPriceOfOneMeal.toStringAsFixed(2);
+    _noOfMealsEditingController.text =
+        widget.userDataWithId.noOfMealsPerDay.toStringAsFixed(2);
+    _totalFoodExpenseEditingController.text =
+        widget.newPlanDataWithId.totalRideFoodExpense.toString();
+    _singleMealExpenseEditingController.addListener(() {
+      _updateTotalFoodExpense();
+      _updateTotalRideExpense();
+    });
+    _noOfMealsEditingController.addListener(() {
+      _updateTotalFoodExpense();
+      _updateTotalRideExpense();
+    });
+
+    // Hotel card
+    _hotelCostEditingController.text =
+        widget.userDataWithId.avgPriceOfOneNightAtHotel.toStringAsFixed(2);
+    _totalHotelExpenseEditingController.text =
+        widget.newPlanDataWithId.totalRideHotelExpense.toStringAsFixed(2);
+    _hotelCostEditingController.addListener(() {
+      _updateTotalHotelExpense();
+      _updateTotalRideExpense();
+    });
+
+    // Total ride expense
+    _totalRideExpenseController.text =
+        widget.newPlanDataWithId.totalRideExpense.toString();
   }
 
   Future _selectDate() async {
@@ -126,7 +172,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           child: Text(
             widget.vehicleDataWithIdList[i].vehicleName,
             style:
-            TextStyle(color: Theme.of(context).textTheme.headline2.color),
+                TextStyle(color: Theme.of(context).textTheme.headline2.color),
           ),
         ),
       );
@@ -134,39 +180,36 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     return dropdowmMenuItems;
   }
 
-  void _updateTripTime(double newDistanceValue) {
-    int hrs = getHours(newDistanceValue);
-    int mins = getMins(newDistanceValue);
-    setState(() {
+  void _updateTripTime() {
+    if (_distanceEditingController.text != "") {
+      int hrs = getHours(double.parse(_distanceEditingController.text));
+      int mins = getMins(double.parse(_distanceEditingController.text));
       _timeEditingController.text = "$hrs hrs $mins mins";
-    });
+    }
   }
 
-  void _updateTripDays(double newDistanceValue) async {
+  void _updateTripDays() async {
     List<UserDataWithId> _myUserDataWithId = await _myDbHelper.getUserData();
     int maxKmInOneDay = _myUserDataWithId[0].maxKmInOneDay;
-    double tNoDays = (newDistanceValue / maxKmInOneDay);
+    double tNoDays =
+        (double.parse(_distanceEditingController.text) / maxKmInOneDay);
     String totalTripDays = tNoDays.toString();
     List<String> decSplit;
     decSplit = totalTripDays.split(".");
     int preDec, postDec, totalDays;
     preDec = int.parse(decSplit[0]);
     postDec = int.parse(decSplit[1]);
-    String unit = "day";
-    if(postDec != 0) {
+    if (postDec != 0) {
       totalDays = preDec + 1;
     } else {
       totalDays = preDec;
     }
-    if(totalDays > 1) {
-      unit = "days";
-    }
     setState(() {
-      _daysEditingController.text = "${totalDays.toString()} $unit";
+      _daysEditingController.text = totalDays.toString();
     });
   }
 
-  void _setVehicleMileage(String value) async {
+  void _updateVehicleMileage(String value) async {
     List<VehicleDataWithId> _vehicleData = await _myDbHelper.getVehicleData();
     for (int i = 0; i < _vehicleData.length; i++) {
       if (_vehicleData[i].vehicleName == value) {
@@ -176,16 +219,231 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     }
   }
 
-  void _setFuelRequired() {
-    
+  void _updateFuelData() {
+    if (_fuelPerUnitCostEditingController.text != "") {
+      _totalFuelExpenseEditingController.text =
+          (double.parse(_fuelPerUnitCostEditingController.text) *
+                  double.parse(_totalFuelRequiredEditingController.text))
+              .toStringAsFixed(2);
+    }
   }
 
-  void _setTotalFuelCost() {
-
+  void _updateFuelDataOnVehicleChange() {
+    if (_fuelPerUnitCostEditingController.text != "") {
+      _totalFuelRequiredEditingController.text =
+          (double.parse(_distanceEditingController.text) /
+                  double.parse(_mileageEditingController.text))
+              .toStringAsFixed(2);
+      _totalFuelExpenseEditingController.text =
+          (double.parse(_fuelPerUnitCostEditingController.text) *
+                  double.parse(_totalFuelRequiredEditingController.text))
+              .toStringAsFixed(2);
+    }
   }
 
-  void _saveEverythingAndGoBack() {
-    // TODO: Implement _saveEverythingAndGoBack()
+  void _updateTotalFoodExpense() {
+    if (_daysEditingController.text != "" &&
+        _noOfMealsEditingController.text != "" &&
+        _singleMealExpenseEditingController.text != "") {
+      _totalFoodExpenseEditingController.text =
+          ((int.parse(_daysEditingController.text) *
+                      int.parse(_noOfMealsEditingController.text)) *
+                  double.parse(_singleMealExpenseEditingController.text))
+              .toStringAsFixed(2);
+    }
+  }
+
+  void _updateTotalHotelExpense() {
+    if (_daysEditingController.text != "" &&
+        _hotelCostEditingController.text != "") {
+      _totalHotelExpenseEditingController.text =
+          (int.parse(_daysEditingController.text) *
+                  double.parse(_hotelCostEditingController.text))
+              .toStringAsFixed(2);
+    }
+  }
+
+  void _updateTotalRideExpense() {
+    if (_totalFoodExpenseEditingController.text != "" &&
+        _totalFuelExpenseEditingController.text != "" &&
+        _totalHotelExpenseEditingController.text != "") {
+      _totalRideExpenseController.text =
+          (double.parse(_totalFoodExpenseEditingController.text) +
+                  double.parse(_totalFuelExpenseEditingController.text) +
+                  double.parse(_totalHotelExpenseEditingController.text))
+              .toStringAsFixed(2);
+    }
+  }
+
+  NewPlanDataWithId _prepareDataForInsertion() {
+    return NewPlanDataWithId(
+      id: widget.newPlanDataWithId.id,
+      source: _fromEditingController.text,
+      destination: _toEditingController.text,
+      beginDate: _dateEditingController.text,
+      totalDistance: double.parse(_distanceEditingController.text),
+      totalNoOfDays: int.parse(_daysEditingController.text),
+      totalRideHotelExpense:
+          double.parse(_totalHotelExpenseEditingController.text),
+      totalRideFoodExpense:
+          double.parse(_totalFoodExpenseEditingController.text),
+      vehicleName: _value,
+      vehicleMileage: double.parse(_mileageEditingController.text),
+      totalRideFuelRequired:
+          double.parse(_totalFuelRequiredEditingController.text),
+      totalRideFuelCost: double.parse(_totalFuelExpenseEditingController.text),
+      totalRideExpense: double.parse(_totalRideExpenseController.text),
+    );
+  }
+
+  void _saveEveryThing() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.updateNewPlanData(newPlanDataWithId);
+  }
+
+  void _deleteThisPlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.deleteNewPlanData(newPlanDataWithId);
+  }
+
+  void _displaySaveAlert(double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Do you want to save the changes?",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            "Do you want to save the edits you made to this plan? If you select No"
+                " then all changes will be lost. This action cannot be undone.",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+            ButtonTheme(
+              child: FlatButton(
+                color: Theme.of(context).textTheme.headline1.color,
+                textColor: Colors.white,
+                splashColor:
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                onPressed: () {
+                  _saveEveryThing();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Save",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            ButtonTheme(
+              child: OutlineButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  "Don't save",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                borderSide: BorderSide(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+                textColor: Theme.of(context).textTheme.headline1.color,
+                onPressed: () {
+                  // Go to homepage without doing anything
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _displayDeleteAlert(double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Are you sure?",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            "Are you sure that you want to delete this plan. Delete action cannot be undone!",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+            ButtonTheme(
+              child: FlatButton(
+                color: Theme.of(context).textTheme.headline1.color,
+                textColor: Colors.white,
+                splashColor:
+                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                onPressed: () {
+                  _deleteThisPlan();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Yes",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            ButtonTheme(
+              child: OutlineButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  "No",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                borderSide: BorderSide(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+                textColor: Theme.of(context).textTheme.headline1.color,
+                onPressed: () {
+                  // Go to homepage without doing anything
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -208,8 +466,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                // _saveEverythingAndGoBack();
-                Navigator.pop(context);
+                _toggleEdit ? _displaySaveAlert(deviceWidth, deviceHeight) : Navigator.pop(context);
               },
               child: Container(
                 padding: EdgeInsets.only(right: 0.026 * deviceWidth),
@@ -241,6 +498,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
               });
               if (_toggleEdit == false) {
                 // save changes
+                _saveEveryThing();
               }
             },
             child: Container(
@@ -291,8 +549,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           ),
           GestureDetector(
             onTap: () {
-              // TODO: showDeleteAlert
-
+              _displayDeleteAlert(deviceWidth, deviceHeight);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -423,7 +680,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: true,
                         onChangeCallbackFunction: (distanceValue) {
-                          _updateTripTime(distanceValue);
+                          _updateTripTime();
                         },
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
@@ -435,7 +692,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         toggleEdit: _toggleEdit,
                         readOnly: true,
                         myController: _timeEditingController,
-                        keyText: "Estd. trip time",
+                        keyText: "Trip time @40Km/h",
                         errorText: "Trip time is automatically calculated",
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: false,
@@ -443,10 +700,12 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                       ),
                       KeyValueRow(
                         toggleEdit: _toggleEdit,
-                        readOnly: true,
+                        readOnly: false,
                         myController: _daysEditingController,
-                        keyText: "Estd. days",
-                        errorText: "Trip duration in days is automatically calculated",
+                        keyText:
+                            "No. of days @${widget.userDataWithId.maxKmInOneDay}KM/day",
+                        errorText:
+                            "Trip duration in days is automatically calculated",
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
@@ -487,23 +746,41 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      IgnorePointer(
-                        child: DropdownButton(
-                          items: _dropDownMenuItems(),
-                          onChanged: (value) {
-                            setState(() {
-                              _value = value;
-                              _setVehicleMileage(value);
-                            });
-                          },
-                          hint: Text("Select your vehicle"),
-                          value: _value,
-                          isExpanded: true,
-                          elevation: 0,
-                          style: GoogleFonts.montserrat(),
-                        ),
-                        ignoring: !_toggleEdit,
-                      ),
+                      _toggleEdit
+                          ? DropdownButton(
+                              items: _dropDownMenuItems(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _value = value;
+                                  _updateVehicleMileage(value);
+                                  _updateFuelDataOnVehicleChange();
+                                });
+                              },
+                              hint: Text("Select your vehicle"),
+                              value: _value,
+                              isExpanded: true,
+                              elevation: 0,
+                              style: GoogleFonts.montserrat(),
+                            )
+                          : IgnorePointer(
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton(
+                                  items: _dropDownMenuItems(),
+                                  onChanged: (value) {
+                                    setState(
+                                      () {
+                                        _value = value;
+                                      },
+                                    );
+                                  },
+                                  hint: Text("Select your vehicle"),
+                                  value: _value,
+                                  isExpanded: true,
+                                  elevation: 0,
+                                  style: GoogleFonts.montserrat(),
+                                ),
+                              ),
+                            ),
                       KeyValueRow(
                         toggleEdit: _toggleEdit,
                         readOnly: true,
@@ -522,11 +799,11 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         toggleEdit: _toggleEdit,
                         readOnly: false,
                         myController: _fuelPerUnitCostEditingController,
-                        keyText: "Fuel cost (per unit)",
+                        keyText: "Fuel cost/unit",
                         errorText: "Please enter proper fuel cost/unit",
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: false,
-                        textInputType: TextInputType.text,
+                        textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
                           WhitelistingTextInputFormatter(
                               RegExp(r"^\d+(\.\d*)?")),
@@ -537,10 +814,11 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         readOnly: true,
                         myController: _totalFuelRequiredEditingController,
                         keyText: "Total fuel required",
-                        errorText: "Please enter the total amount of fuel required",
+                        errorText:
+                            "Please enter the total amount of fuel required",
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: false,
-                        textInputType: TextInputType.datetime,
+                        textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
                           WhitelistingTextInputFormatter(
                               RegExp(r"^\d+(\.\d*)?")),
@@ -550,18 +828,211 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         toggleEdit: _toggleEdit,
                         readOnly: true,
                         myController: _totalFuelExpenseEditingController,
-                        keyText: "Total fuel cost",
+                        keyText: "Total fuel expense",
                         errorText: "Please enter the total fuel cost",
                         onTapCallbackNeeded: false,
                         onChangeCallbackNeeded: false,
                         onChangeCallbackFunction: (distanceValue) {
-                          _updateTripTime(distanceValue);
+                          _updateTripTime();
                         },
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
                           WhitelistingTextInputFormatter(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 0.152 * deviceHeight,
+                width: 0.92 * deviceWidth,
+                padding: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.025 * deviceWidth,
+                    top: 0.001 * deviceWidth,
+                    bottom: 0.02 * deviceWidth),
+                margin: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.03 * deviceWidth,
+                    top: 0.025 * deviceWidth,
+                    bottom: 0.025 * deviceWidth),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).textTheme.headline4.color,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Theme.of(context).textTheme.headline5.color,
+                      blurRadius: 5.0,
+                    ),
+                  ],
+                ),
+                child: Container(
+                  padding: EdgeInsets.only(
+                      left: 0.00,
+                      top: 0.025 * deviceWidth,
+                      right: 0.01 * deviceWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: false,
+                        myController: _singleMealExpenseEditingController,
+                        keyText: "Single meal expense",
+                        errorText: "Please enter average cost of a single meal",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                      ),
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: false,
+                        myController: _noOfMealsEditingController,
+                        keyText: "No. of meals/day",
+                        errorText: "Please enter the no. of meals/day",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                      ),
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: true,
+                        myController: _totalFoodExpenseEditingController,
+                        keyText: "Total food expense",
+                        errorText: "Please enter the total food expense",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 0.11 * deviceHeight,
+                width: 0.92 * deviceWidth,
+                padding: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.025 * deviceWidth,
+                    top: 0.001 * deviceWidth,
+                    bottom: 0.02 * deviceWidth),
+                margin: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.03 * deviceWidth,
+                    top: 0.025 * deviceWidth,
+                    bottom: 0.025 * deviceWidth),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).textTheme.headline4.color,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Theme.of(context).textTheme.headline5.color,
+                      blurRadius: 5.0,
+                    ),
+                  ],
+                ),
+                child: Container(
+                  padding: EdgeInsets.only(
+                      left: 0.00,
+                      top: 0.025 * deviceWidth,
+                      right: 0.01 * deviceWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: false,
+                        myController: _hotelCostEditingController,
+                        keyText: "Hotel cost/night",
+                        errorText: "Please enter average cost of a single meal",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                      ),
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: true,
+                        myController: _totalHotelExpenseEditingController,
+                        keyText: "Total hotel expense",
+                        errorText: "Please enter the total hotel expense",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 0.0655 * deviceHeight,
+                width: 0.92 * deviceWidth,
+                padding: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.025 * deviceWidth,
+                    top: 0.001 * deviceWidth,
+                    bottom: 0.02 * deviceWidth),
+                margin: EdgeInsets.only(
+                    left: 0.04 * deviceWidth,
+                    right: 0.03 * deviceWidth,
+                    top: 0.025 * deviceWidth,
+                    bottom: 0.025 * deviceWidth),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).textTheme.headline4.color,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Theme.of(context).textTheme.headline5.color,
+                      blurRadius: 5.0,
+                    ),
+                  ],
+                ),
+                child: Container(
+                  padding: EdgeInsets.only(
+                      left: 0.00,
+                      top: 0.025 * deviceWidth,
+                      right: 0.01 * deviceWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      KeyValueRow(
+                        toggleEdit: _toggleEdit,
+                        readOnly: true,
+                        myController: _totalRideExpenseController,
+                        keyText: "Total expense",
+                        errorText: "Please enter total ride expense",
+                        onTapCallbackNeeded: false,
+                        onChangeCallbackNeeded: false,
+                        textInputType: TextInputType.numberWithOptions(),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                        isTotal: true,
                       ),
                     ],
                   ),

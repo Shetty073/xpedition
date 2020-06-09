@@ -191,7 +191,7 @@ class _PlanCardState extends State<PlanCard> {
                       ),
                       Flexible(
                         child: Text(
-                          "${widget.days} day",
+                          widget.days > 1 ? "${widget.days} days" : "${widget.days} day",
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.montserrat(
                             textStyle: TextStyle(

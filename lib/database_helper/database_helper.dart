@@ -121,6 +121,25 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateNewPlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.update(
+      'new_plan_data',
+      newPlanDataWithId.toMap(),
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
+  }
+
+  Future<void> deleteNewPlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.delete(
+      'new_plan_data',
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
+  }
+
   Future<void> createActivePlanDataTable() async {
     final Database db = await database;
     db.execute(

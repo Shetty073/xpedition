@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class KeyValueRow extends StatefulWidget {
   final TextEditingController myController;
-  final bool toggleEdit, onTapCallbackNeeded, readOnly, onChangeCallbackNeeded;
+  final bool toggleEdit, onTapCallbackNeeded, readOnly, onChangeCallbackNeeded, isTotal;
   final String keyText, errorText;
   final TextInputType textInputType;
 
@@ -24,6 +24,7 @@ class KeyValueRow extends StatefulWidget {
     this.onChangeCallbackFunction,
     @required this.textInputType,
     this.inputFormatters,
+    this.isTotal,
   });
 
   @override
@@ -40,6 +41,7 @@ class _KeyValueRowState extends State<KeyValueRow> {
         children: <Widget>[
           Text(
             "${widget.keyText}:",
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.montserrat(
               textStyle: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -88,6 +90,7 @@ class _KeyValueRowState extends State<KeyValueRow> {
               style: GoogleFonts.montserrat(
                 textStyle: TextStyle(
                   color: Theme.of(context).textTheme.bodyText1.color,
+                  fontWeight: (widget.isTotal == null) ? FontWeight.normal : FontWeight.bold,
                 ),
               ),
             ),
