@@ -9,21 +9,22 @@ class NewPlanData {
       totalRideFuelRequired,
       totalRideFuelCost,
       totalRideExpense;
-  final int totalNoOfDays;
+  final int totalNoOfDays, totalNoOfMealsPerDay;
 
   NewPlanData(
       {@required this.source,
-        @required this.destination,
-        @required this.beginDate,
-        @required this.totalDistance,
-        @required this.totalNoOfDays,
-        @required this.totalRideHotelExpense,
-        @required this.totalRideFoodExpense,
-        @required this.vehicleName,
-        @required this.vehicleMileage,
-        @required this.totalRideFuelRequired,
-        @required this.totalRideFuelCost,
-        @required this.totalRideExpense});
+      @required this.destination,
+      @required this.beginDate,
+      @required this.totalDistance,
+      @required this.totalNoOfDays,
+      @required this.totalRideHotelExpense,
+      @required this.totalNoOfMealsPerDay,
+      @required this.totalRideFoodExpense,
+      @required this.vehicleName,
+      @required this.vehicleMileage,
+      @required this.totalRideFuelRequired,
+      @required this.totalRideFuelCost,
+      @required this.totalRideExpense});
 
   Map<String, dynamic> toMap() {
     return {
@@ -33,6 +34,7 @@ class NewPlanData {
       "totalDistance": totalDistance,
       "totalNoOfDays": totalNoOfDays,
       "totalRideHotelExpense": totalRideHotelExpense,
+      "totalNoOfMealsPerDay": totalNoOfMealsPerDay,
       "totalRideFoodExpense": totalRideFoodExpense,
       "vehicleName": vehicleName,
       "vehicleMileage": vehicleMileage,

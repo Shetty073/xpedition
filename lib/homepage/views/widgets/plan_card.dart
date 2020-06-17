@@ -12,6 +12,7 @@ class PlanCard extends StatefulWidget {
   final String source, destination, beginDate;
   final int hrs, mins, days;
   final double totalDistance;
+  final bool isPlanActive, alreadyHasAnActivePlan;
 
   PlanCard(
       {@required this.newPlanDataWithId,
@@ -21,7 +22,9 @@ class PlanCard extends StatefulWidget {
       @required this.hrs,
       @required this.mins,
       @required this.days,
-      @required this.totalDistance});
+      @required this.totalDistance,
+      @required this.isPlanActive,
+      @required this.alreadyHasAnActivePlan});
 
   @override
   _PlanCardState createState() => _PlanCardState();
@@ -50,6 +53,8 @@ class _PlanCardState extends State<PlanCard> {
               newPlanDataWithId: widget.newPlanDataWithId,
               userDataWithId: value,
               vehicleDataWithIdList: vehicleDataWithIdList,
+              isPlanActive: widget.isPlanActive,
+              alreadyHasAnActivePlan: widget.alreadyHasAnActivePlan,
             ))));
   }
 
@@ -68,7 +73,7 @@ class _PlanCardState extends State<PlanCard> {
         _getVehicleDataWithIdList().then((value) => _openViewEditPlanPage(value));
       },
       child: Container(
-        height: 0.14 * deviceHeight,
+        height: 0.17 * deviceHeight,
         width: 0.9 * deviceWidth,
         padding: EdgeInsets.only(
             left: 0.025 * deviceWidth,
@@ -90,171 +95,202 @@ class _PlanCardState extends State<PlanCard> {
             ),
           ],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
           children: <Widget>[
-            Container(
-              width: 0.27 * deviceWidth,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Flexible(
-                    child: Text(
-                      "${widget.source}",
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.montserrat(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 0.055 * deviceWidth,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 0.001 * deviceHeight,
-                  ),
-                  Text(
-                    "to",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 0.001 * deviceHeight,
-                  ),
-                  Flexible(
-                    child: Text(
-                      "${widget.destination}",
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.montserrat(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 0.055 * deviceWidth,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            MyVerticalDivider(
-              sidedBoxHeight: 0.19 * deviceWidth,
-              leftGap: 0.02 * deviceWidth,
-              rightGap: 0.02 * deviceHeight,
-              dividerWidth: 0.005 * deviceWidth,
-            ),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        "Est. trip time: ",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Container(
+                  Container(
+                    width: 0.27 * deviceWidth,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Flexible(
                           child: Text(
-                            "${widget.hrs} hrs ${widget.mins} mins",
+                            "${widget.source}",
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.montserrat(
                               textStyle: TextStyle(
-                                fontWeight: FontWeight.normal,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 0.06 * deviceWidth,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 0.005 * deviceHeight,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        "In days: ",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        SizedBox(
+                          height: 0.001 * deviceHeight,
                         ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          widget.days > 1 ? "${widget.days} days" : "${widget.days} day",
-                          overflow: TextOverflow.ellipsis,
+                        Text(
+                          "to",
                           style: GoogleFonts.montserrat(
                             textStyle: TextStyle(
                               fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 0.005 * deviceHeight,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        "Total distance: ",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        SizedBox(
+                          height: 0.001 * deviceHeight,
                         ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          "${widget.totalDistance} KM",
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.normal,
+                        Flexible(
+                          child: Text(
+                            "${widget.destination}",
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 0.06 * deviceWidth,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  SizedBox(
-                    height: 0.005 * deviceHeight,
+                  MyVerticalDivider(
+                    sidedBoxHeight: 0.2 * deviceWidth,
+                    leftGap: 0.02 * deviceWidth,
+                    rightGap: 0.02 * deviceHeight,
+                    dividerWidth: 0.005 * deviceWidth,
                   ),
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        "Begin date: ",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          "${widget.beginDate}",
-                          style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.normal,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              "Est. trip time: ",
+                              style: GoogleFonts.montserrat(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                            Flexible(
+                              child: Container(
+                                child: Text(
+                                  "${widget.hrs} hrs ${widget.mins} mins",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          height: 0.005 * deviceHeight,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              "In days: ",
+                              style: GoogleFonts.montserrat(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                widget.days > 1 ? "${widget.days} days" : "${widget.days} day",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 0.005 * deviceHeight,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              "Total distance: ",
+                              style: GoogleFonts.montserrat(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                "${widget.totalDistance} KM",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 0.005 * deviceHeight,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              "Begin date: ",
+                              style: GoogleFonts.montserrat(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                "${widget.beginDate}",
+                                style: GoogleFonts.montserrat(
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Total ride expense: ",
+                  style: GoogleFonts.montserrat(
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 0.04 * deviceWidth,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    "${widget.newPlanDataWithId.totalRideExpense}",
+                    style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 0.04 * deviceWidth,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

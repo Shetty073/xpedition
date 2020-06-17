@@ -171,22 +171,25 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
 
   // Save data to database
   NewPlanData _prepareDataForInsertion() {
-    double totalDistance = double.parse((double.parse(widget.distanceController.text)).toStringAsFixed(2));
+    double totalDistance = double.parse(
+        (double.parse(widget.distanceController.text)).toStringAsFixed(2));
     double fuelRequired = double.parse(
-        (totalDistance /
-                double.parse(widget.fuelMileageController.text))
+        (totalDistance / double.parse(widget.fuelMileageController.text))
             .toStringAsFixed(2));
     double rideFuelExpense = double.parse(
         (fuelRequired * widget.userDataWithIdList[0].fuelPricePerLitre)
             .toStringAsFixed(2));
+    int totalnoOfMealsPerDay =
+        (double.parse(widget.distanceController.text) < 200)
+            ? 1
+            : (widget.userDataWithIdList[0].noOfMealsPerDay);
     double rideFoodExpense = double.parse(
-        ((int.parse(widget.noOfDaysController.text) *
-                    (widget.userDataWithIdList[0].noOfMealsPerDay)) *
+        ((int.parse(widget.noOfDaysController.text) * totalnoOfMealsPerDay) *
                 (widget.userDataWithIdList[0].avgPriceOfOneMeal))
             .toStringAsFixed(2));
     double rideHotelExpense = double.parse(
         (widget.userDataWithIdList[0].avgPriceOfOneNightAtHotel *
-                int.parse(widget.noOfDaysController.text))
+                (int.parse(widget.noOfDaysController.text) - 1))
             .toStringAsFixed(2));
     double totalRideExpense = double.parse(
         (rideFoodExpense + rideFuelExpense + rideHotelExpense)
@@ -198,6 +201,7 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
       totalDistance: totalDistance,
       totalNoOfDays: int.parse(widget.noOfDaysController.text),
       totalRideHotelExpense: rideHotelExpense,
+      totalNoOfMealsPerDay: totalnoOfMealsPerDay,
       totalRideFoodExpense: rideFoodExpense,
       vehicleName: _selectedVehicle.trim(),
       vehicleMileage: double.parse(widget.fuelMileageController.text),

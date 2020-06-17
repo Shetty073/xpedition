@@ -86,7 +86,7 @@ class DatabaseHelper {
   Future<void> createNewPlanDataTable() async {
     final Database db = await database;
     db.execute(
-        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+        "CREATE TABLE new_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalnoOfMealsPerDay INTEGER, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
   }
 
   Future<void> insertNewPlanData(NewPlanData newPlanData) async {
@@ -111,6 +111,7 @@ class DatabaseHelper {
         totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
         totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
         vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
@@ -143,14 +144,14 @@ class DatabaseHelper {
   Future<void> createActivePlanDataTable() async {
     final Database db = await database;
     db.execute(
-        "CREATE TABLE active_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+        "CREATE TABLE active_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalnoOfMealsPerDay INTEGER, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
   }
 
-  Future<void> insertActivePlanData(NewPlanData newPlanData) async {
+  Future<void> insertActivePlanData(NewPlanDataWithId newPlanDataWithId) async {
     final Database db = await database;
     await db.insert(
       'active_plan_data',
-      newPlanData.toMap(),
+      newPlanDataWithId.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -168,6 +169,7 @@ class DatabaseHelper {
         totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
         totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
         vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
@@ -176,6 +178,25 @@ class DatabaseHelper {
         totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
       );
     });
+  }
+
+  Future<void> updateActivePlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.update(
+      'active_plan_data',
+      newPlanDataWithId.toMap(),
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
+  }
+
+  Future<void> deleteActivePlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.delete(
+      'active_plan_data',
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
   }
 
 }

@@ -38,6 +38,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     myPref.setBool("app_init", true);
   }
 
+
+
   @override
   void initState() {
     super.initState();

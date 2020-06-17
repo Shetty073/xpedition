@@ -13,11 +13,14 @@ class ViewEditPlanPage extends StatefulWidget {
   final NewPlanDataWithId newPlanDataWithId;
   final UserDataWithId userDataWithId;
   final List<VehicleDataWithId> vehicleDataWithIdList;
+  final bool isPlanActive, alreadyHasAnActivePlan;
 
   ViewEditPlanPage(
       {@required this.newPlanDataWithId,
       @required this.userDataWithId,
-      @required this.vehicleDataWithIdList});
+      @required this.vehicleDataWithIdList,
+      @required this.isPlanActive,
+      @required this.alreadyHasAnActivePlan});
 
   @override
   _ViewEditPlanPageState createState() => _ViewEditPlanPageState();
@@ -49,7 +52,6 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
       TextEditingController();
   TextEditingController _totalRideExpenseController = TextEditingController();
   bool _toggleEdit = false;
-
   String _value;
 
   // When we use google maps offline, google uses the following formula to
@@ -107,7 +109,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     _singleMealExpenseEditingController.text =
         widget.userDataWithId.avgPriceOfOneMeal.toStringAsFixed(2);
     _noOfMealsEditingController.text =
-        widget.userDataWithId.noOfMealsPerDay.toStringAsFixed(2);
+        widget.newPlanDataWithId.totalNoOfMealsPerDay.toString();
     _totalFoodExpenseEditingController.text =
         widget.newPlanDataWithId.totalRideFoodExpense.toString();
     _singleMealExpenseEditingController.addListener(() {
@@ -257,7 +259,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     if (_daysEditingController.text != "" &&
         _hotelCostEditingController.text != "") {
       _totalHotelExpenseEditingController.text =
-          (int.parse(_daysEditingController.text) *
+          ((int.parse(_daysEditingController.text) - 1) *
                   double.parse(_hotelCostEditingController.text))
               .toStringAsFixed(2);
     }
@@ -285,6 +287,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
       totalNoOfDays: int.parse(_daysEditingController.text),
       totalRideHotelExpense:
           double.parse(_totalHotelExpenseEditingController.text),
+      totalNoOfMealsPerDay: int.parse(_noOfMealsEditingController.text),
       totalRideFoodExpense:
           double.parse(_totalFoodExpenseEditingController.text),
       vehicleName: _value,
@@ -296,14 +299,155 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     );
   }
 
+  void _activatePlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.insertActivePlanData(newPlanDataWithId);
+    _myDbHelper.deleteNewPlanData(newPlanDataWithId);
+    Navigator.pop(context);
+  }
+
+  void _displayActivateAlert(double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Do you want to mark this plan as active? This action cannot be undone!",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            "Activating this plan will mark it as active i.e. you have started your trip. This unlocks some additional features"
+            " such as adding notes about a place for future reference, adjusting price on the go and many other things. Once a plan is marked"
+            " as active it cannot be unmarked but it can be marked as completed (your trip has be completed).",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+            ButtonTheme(
+              child: FlatButton(
+                color: Theme.of(context).textTheme.headline1.color,
+                textColor: Colors.white,
+                splashColor:
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                onPressed: () {
+                  _saveEveryThing();
+                  _activatePlan();
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Activate",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            ButtonTheme(
+              child: OutlineButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  "Back",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                borderSide: BorderSide(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+                textColor: Theme.of(context).textTheme.headline1.color,
+                onPressed: () {
+                  // Go to homepage without doing anything
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _displayAlreadyAnotherPlanActiveAlert(double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Only one plan can be active at a time!",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            "How man places can you be at once? Its a rhetorical question. In this app at a time only one plan can be marked as active and it seems like"
+                " you have already marked one. In order to mark this one as active you must delete the one you have marked as active.",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+//            ButtonTheme(
+//              child: FlatButton(
+//                color: Theme.of(context).textTheme.headline1.color,
+//                textColor: Colors.white,
+//                splashColor:
+//                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+//                onPressed: () {
+//                  Navigator.pop(context);
+//                },
+//                child: Text(
+//                  "Okay",
+//                  style: GoogleFonts.montserrat(
+//                    fontSize: 0.04 * deviceWidth,
+//                    fontWeight: FontWeight.bold,
+//                  ),
+//                ),
+//                shape: RoundedRectangleBorder(
+//                  borderRadius: BorderRadius.circular(10.0),
+//                ),
+//              ),
+//            ),
+            ButtonTheme(
+              child: OutlineButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  "Back",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                borderSide: BorderSide(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+                textColor: Theme.of(context).textTheme.headline1.color,
+                onPressed: () {
+                  // Go to homepage without doing anything
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _saveEveryThing() async {
     NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
     _myDbHelper.updateNewPlanData(newPlanDataWithId);
-  }
-
-  void _deleteThisPlan() async {
-    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
-    _myDbHelper.deleteNewPlanData(newPlanDataWithId);
   }
 
   void _displaySaveAlert(double deviceWidth, double deviceHeight) {
@@ -319,7 +463,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           ),
           content: Text(
             "Do you want to save the edits you made to this plan? If you select No"
-                " then all changes will be lost. This action cannot be undone.",
+            " then all changes will be lost. This action cannot be undone.",
             style: TextStyle(
               color: Theme.of(context).textTheme.headline2.color,
             ),
@@ -377,6 +521,16 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     );
   }
 
+  void _deleteThisPlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.deleteNewPlanData(newPlanDataWithId);
+  }
+
+  void _deleteThisActivePlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.deleteActivePlanData(newPlanDataWithId);
+  }
+
   void _displayDeleteAlert(double deviceWidth, double deviceHeight) {
     showDialog(
       context: context,
@@ -400,9 +554,9 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                 color: Theme.of(context).textTheme.headline1.color,
                 textColor: Colors.white,
                 splashColor:
-                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
                 onPressed: () {
-                  _deleteThisPlan();
+                  (widget.isPlanActive) ? _deleteThisActivePlan() : _deleteThisPlan();
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
@@ -466,7 +620,9 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                _toggleEdit ? _displaySaveAlert(deviceWidth, deviceHeight) : Navigator.pop(context);
+                _toggleEdit
+                    ? _displaySaveAlert(deviceWidth, deviceHeight)
+                    : Navigator.pop(context);
               },
               child: Container(
                 padding: EdgeInsets.only(right: 0.026 * deviceWidth),
@@ -608,6 +764,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              // TODO: Add completion logic and also add additional features (trip notes , etc)
               Container(
                 height: 0.27 * deviceHeight,
                 width: 0.92 * deviceWidth,
@@ -1037,6 +1194,42 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                     ],
                   ),
                 ),
+              ),
+              (!widget.isPlanActive) ? Container(
+                child: SizedBox(
+                  height: 0.075 * deviceHeight,
+                  width: 0.35 * deviceWidth,
+                  child: FlatButton(
+                    color:
+                    Theme.of(context).textTheme.headline1.color,
+                    textColor: Colors.white,
+                    splashColor: Theme.of(context)
+                        .textTheme
+                        .headline1
+                        .color
+                        .withAlpha(50),
+                    onPressed: () {
+                      if (widget.alreadyHasAnActivePlan) {
+                        _displayAlreadyAnotherPlanActiveAlert(deviceWidth, deviceHeight);
+                      } else if (_formKey.currentState.validate()) {
+                        _displayActivateAlert(deviceWidth, deviceHeight);
+                      }
+                    },
+                    child: Text(
+                      "Activate",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 0.04 * deviceWidth,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ),
+              ) : Container(),
+              SizedBox(
+                height: 0.02 * deviceHeight,
               ),
             ],
           ),

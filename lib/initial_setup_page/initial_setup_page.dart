@@ -94,8 +94,10 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     this.noOfMealsPerDay = int.parse(_noOfMealsPerDayController.text);
 
     _insertDataIntoDatabase();
+    Navigator.of(context).popUntil((route) => route.isFirst);
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomePage()), result: false);
+        context, MaterialPageRoute(builder: (context) => HomePage()),
+        result: false);
   }
 
   void initSharedPref() async {
@@ -157,7 +159,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "First name",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               validator: (value) {
@@ -188,7 +191,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "Last name",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               validator: (value) {
@@ -220,7 +224,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         decoration: InputDecoration(
                           hintText: "Vehicle name",
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                         validator: (value) {
@@ -246,7 +251,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         decoration: InputDecoration(
                           hintText: "Max KM you can travel in a day",
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                         inputFormatters: <TextInputFormatter>[
@@ -279,7 +285,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "Vehicle mileage",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
@@ -314,7 +321,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "Fuel price/litre",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
@@ -354,7 +362,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "Avg. price of a meal",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
@@ -389,7 +398,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               decoration: InputDecoration(
                                 hintText: "Price of hotel/night",
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
@@ -425,7 +435,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                         decoration: InputDecoration(
                           hintText: "No. of meals/day",
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                         inputFormatters: <TextInputFormatter>[

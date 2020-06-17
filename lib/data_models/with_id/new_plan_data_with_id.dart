@@ -12,7 +12,7 @@ class NewPlanDataWithId {
       totalRideFuelRequired,
       totalRideFuelCost,
       totalRideExpense;
-  final int totalNoOfDays;
+  final int totalNoOfDays, totalNoOfMealsPerDay;
 
   NewPlanDataWithId(
       {@required this.id,
@@ -22,6 +22,7 @@ class NewPlanDataWithId {
       @required this.totalDistance,
       @required this.totalNoOfDays,
       @required this.totalRideHotelExpense,
+      @required this.totalNoOfMealsPerDay,
       @required this.totalRideFoodExpense,
       @required this.vehicleName,
       @required this.vehicleMileage,
@@ -38,6 +39,7 @@ class NewPlanDataWithId {
       "totalDistance": totalDistance,
       "totalNoOfDays": totalNoOfDays,
       "totalRideHotelExpense": totalRideHotelExpense,
+      "totalNoOfMealsPerDay": totalNoOfMealsPerDay,
       "totalRideFoodExpense": totalRideFoodExpense,
       "vehicleName": vehicleName,
       "vehicleMileage": vehicleMileage,
