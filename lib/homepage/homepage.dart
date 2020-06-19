@@ -1,12 +1,16 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:xpedition/homepage/views/plans_view.dart';
-import 'package:xpedition/homepage/views/settings_view.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:xpedition/initial_setup_page/initial_setup_page.dart';
 import 'package:xpedition/create_new_plan/create_new_plan.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
+import 'package:xpedition/homepage/views/completed_plans_view.dart';
+import 'package:xpedition/homepage/views/plans_view.dart';
+import 'package:xpedition/homepage/views/settings_view.dart';
+import 'package:xpedition/initial_setup_page/initial_setup_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,50 +18,137 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  int currPageIndex;
-  SharedPreferences myPref;
+  int _currPageIndex;
+  SharedPreferences _myPref;
+  UserDataWithId _myUserDataWithId;
+  DatabaseHelper _myDbHelper;
+
+  final FirebaseMessaging _fcm = FirebaseMessaging();
 
   PageController _pageController = PageController(
     initialPage: 0,
   );
 
-  void pageChanged(int index) {
-    setState(() {
-      currPageIndex = index;
-      if (currPageIndex == 1) {
-        if (!myPref.containsKey("complete_init_setup")) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => InitialSetupPage()));
-        }
-      }
-    });
+  void _pageChanged(int index) {
+    _myDbHelper.getUserData().then((value) => {
+          _myUserDataWithId = value[0],
+          setState(() {
+            _currPageIndex = index;
+            if (_currPageIndex == 1) {
+              if (!_myPref.containsKey("complete_init_setup")) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InitialSetupPage(),
+                  ),
+                );
+              }
+            }
+          }),
+        });
   }
 
-  void initSharedPref() async {
-    myPref = await SharedPreferences.getInstance();
-    myPref.setBool("app_init", true);
+  void _initSharedPref() async {
+    _myPref = await SharedPreferences.getInstance();
+    _myPref.setBool("app_init", true);
   }
 
-
+  void _displayCloudMessagingAlert(
+      Map<String, dynamic> message, double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            message["notification"]["title"],
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            message["notification"]["body"],
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+            ButtonTheme(
+              child: FlatButton(
+                color: Theme.of(context).textTheme.headline1.color,
+                textColor: Colors.white,
+                splashColor:
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Okay",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+//            ButtonTheme(
+//              child: OutlineButton(
+//                textTheme: ButtonTextTheme.primary,
+//                shape: RoundedRectangleBorder(
+//                    borderRadius: BorderRadius.circular(10.0)),
+//                child: Text(
+//                  "Cancel",
+//                  style: GoogleFonts.montserrat(
+//                    fontSize: 0.04 * deviceWidth,
+//                    fontWeight: FontWeight.bold,
+//                  ),
+//                ),
+//                borderSide: BorderSide(
+//                  color: Theme.of(context).textTheme.headline1.color,
+//                ),
+//                textColor: Theme.of(context).textTheme.headline1.color,
+//                onPressed: () {
+//                  Navigator.pop(context);
+//                },
+//              ),
+//            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    initSharedPref();
-    currPageIndex = 0;
+    _initSharedPref();
+    _currPageIndex = 0;
+    _myDbHelper = DatabaseHelper();
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        _displayCloudMessagingAlert(message, MediaQuery.of(context).size.width,
+            MediaQuery.of(context).size.height);
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceHeight = MediaQuery.of(context).size.height;
     final deviceWidth = MediaQuery.of(context).size.width;
-
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text(
-            "Xpedition",
+            (_currPageIndex == 0) ? "Xpedition" : "Settings",
             style: GoogleFonts.montserrat(
               textStyle: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -68,56 +159,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0.0,
           actions: <Widget>[
-            GestureDetector(
-              onTap: () {
-                // TODO: goto finished trips page
-
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
-                    width: 0.001 * deviceWidth,
-                  ),
-                ),
-                padding: EdgeInsets.only(right: 0.015 * deviceWidth, top: 0.0, bottom: 0.0, left: 0.015 * deviceWidth),
-                margin: EdgeInsets.only(right: 0.015 * deviceWidth, top: 0.03 * deviceWidth, bottom: 0.03 * deviceWidth),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      "Completed",
-                      style: GoogleFonts.montserrat(
-                        textStyle: TextStyle(
+            (_currPageIndex == 0)
+                ? GestureDetector(
+                    onTap: () {
+                      // TODO: goto finished trips page
+                      _myDbHelper.getCompletedPlanData().then(
+                            (value) => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CompletedPlansView(
+                                  completedPlanDataList: value,
+                                ),
+                              ),
+                            ),
+                          );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
                           color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.normal,
+                          width: 0.001 * deviceWidth,
                         ),
                       ),
-                    ),
-                    IconTheme(
-                      data: IconThemeData(
-                        color: Theme.of(context).primaryColor,
+                      padding: EdgeInsets.only(
+                          right: 0.015 * deviceWidth,
+                          top: 0.0,
+                          bottom: 0.0,
+                          left: 0.015 * deviceWidth),
+                      margin: EdgeInsets.only(
+                          right: 0.015 * deviceWidth,
+                          top: 0.03 * deviceWidth,
+                          bottom: 0.03 * deviceWidth),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            "Completed",
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                          IconTheme(
+                            data: IconThemeData(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            child: Icon(
+                              Icons.archive,
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Icon(
-                        Icons.archive,
-                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : Container(),
           ],
         ),
         body: PageView(
           controller: _pageController,
           scrollDirection: Axis.horizontal,
           onPageChanged: (index) {
-            pageChanged(index);
+            _pageChanged(index);
           },
           children: <Widget>[
             PlansView(),
-            SettingsView(),
+            SettingsView(
+              myUserDataWithId: _myUserDataWithId,
+            ),
           ],
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -133,7 +244,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           onPressed: () {
             // go to create new plan page
-            if (!myPref.containsKey("complete_init_setup")) {
+            if (!_myPref.containsKey("complete_init_setup")) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => InitialSetupPage()));
             } else {
@@ -141,7 +252,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   context,
                   MaterialPageRoute(
                       builder: (context) => CreateNewPlan(
-                            myPref: myPref,
+                            myPref: _myPref,
                           )));
             }
           },
@@ -160,7 +271,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
-                    icon: currPageIndex == 0
+                    icon: _currPageIndex == 0
                         ? Icon(Icons.home)
                         : Icon(OMIcons.home),
                     iconSize: 0.08 * deviceWidth,
@@ -180,7 +291,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     color: Theme.of(context).textTheme.headline3.color,
                   ),
                   child: IconButton(
-                    icon: currPageIndex == 1
+                    icon: _currPageIndex == 1
                         ? Icon(Icons.person)
                         : Icon(OMIcons.person),
                     iconSize: 0.08 * deviceWidth,

@@ -5,7 +5,6 @@ import 'package:xpedition/create_new_plan/views/plan_form_view_two.dart';
 import 'package:xpedition/create_new_plan/views/plan_form_view_three.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 import 'package:xpedition/database_helper/database_helper.dart';

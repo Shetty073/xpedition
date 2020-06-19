@@ -199,4 +199,62 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> createCompletedPlanDataTable() async {
+    final Database db = await database;
+    db.execute(
+        "CREATE TABLE completed_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalnoOfMealsPerDay INTEGER, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
+  }
+
+  Future<void> insertCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.insert(
+      'completed_plan_data',
+      newPlanDataWithId.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<NewPlanDataWithId>> getCompletedPlanData() async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> newPlanDataMapsWithId =
+    await db.query('completed_plan_data');
+    return List.generate(newPlanDataMapsWithId.length, (i) {
+      return NewPlanDataWithId(
+        id: newPlanDataMapsWithId[i]['id'],
+        source: newPlanDataMapsWithId[i]['source'],
+        destination: newPlanDataMapsWithId[i]['destination'],
+        beginDate: newPlanDataMapsWithId[i]['beginDate'],
+        totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
+        totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
+        totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
+        vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
+        vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
+        totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
+      );
+    });
+  }
+
+  Future<void> updateCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.update(
+      'completed_plan_data',
+      newPlanDataWithId.toMap(),
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
+  }
+
+  Future<void> deleteCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+    final Database db = await database;
+    await db.delete(
+      'completed_plan_data',
+      where: "id = ?",
+      whereArgs: [newPlanDataWithId.id],
+    );
+  }
+
 }

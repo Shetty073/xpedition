@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:xpedition/data_models/new_plan_data.dart';
 import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
@@ -396,27 +395,6 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
             ),
           ),
           actions: <Widget>[
-//            ButtonTheme(
-//              child: FlatButton(
-//                color: Theme.of(context).textTheme.headline1.color,
-//                textColor: Colors.white,
-//                splashColor:
-//                Theme.of(context).textTheme.headline1.color.withAlpha(50),
-//                onPressed: () {
-//                  Navigator.pop(context);
-//                },
-//                child: Text(
-//                  "Okay",
-//                  style: GoogleFonts.montserrat(
-//                    fontSize: 0.04 * deviceWidth,
-//                    fontWeight: FontWeight.bold,
-//                  ),
-//                ),
-//                shape: RoundedRectangleBorder(
-//                  borderRadius: BorderRadius.circular(10.0),
-//                ),
-//              ),
-//            ),
             ButtonTheme(
               child: OutlineButton(
                 textTheme: ButtonTextTheme.primary,
@@ -600,6 +578,81 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     );
   }
 
+  void _completeThisPlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper.insertCompletedPlanData(newPlanDataWithId);
+    _myDbHelper.deleteActivePlanData(newPlanDataWithId);
+  }
+
+  void _displayCompleteAlert(double deviceWidth, double deviceHeight) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Are you sure?",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          content: Text(
+            "Are you sure that you want to mark this plan as finished",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.headline2.color,
+            ),
+          ),
+          actions: <Widget>[
+            ButtonTheme(
+              child: FlatButton(
+                color: Theme.of(context).textTheme.headline1.color,
+                textColor: Colors.white,
+                splashColor:
+                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                onPressed: () {
+                  _completeThisPlan();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Yes",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            ButtonTheme(
+              child: OutlineButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  "No",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 0.04 * deviceWidth,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                borderSide: BorderSide(
+                  color: Theme.of(context).textTheme.headline1.color,
+                ),
+                textColor: Theme.of(context).textTheme.headline1.color,
+                onPressed: () {
+                  // Go to homepage without doing anything
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -647,7 +700,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           ],
         ),
         actions: <Widget>[
-          GestureDetector(
+          (!widget.isPlanActive) ? GestureDetector(
             onTap: () {
               setState(() {
                 _toggleEdit = !_toggleEdit;
@@ -702,7 +755,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                 ],
               ),
             ),
-          ),
+          ) : Container(),
           GestureDetector(
             onTap: () {
               _displayDeleteAlert(deviceWidth, deviceHeight);
@@ -764,7 +817,6 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              // TODO: Add completion logic and also add additional features (trip notes , etc)
               Container(
                 height: 0.27 * deviceHeight,
                 width: 0.92 * deviceWidth,
@@ -1227,7 +1279,37 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                     ),
                   ),
                 ),
-              ) : Container(),
+              ) : Container(
+                child: SizedBox(
+                  height: 0.075 * deviceHeight,
+                  width: 0.45 * deviceWidth,
+                  child: FlatButton(
+                    color:
+                    Theme.of(context).textTheme.headline1.color,
+                    textColor: Colors.white,
+                    splashColor: Theme.of(context)
+                        .textTheme
+                        .headline1
+                        .color
+                        .withAlpha(50),
+                    onPressed: () {
+                      if (_formKey.currentState.validate()) {
+                        _displayCompleteAlert(deviceWidth, deviceHeight);
+                      }
+                    },
+                    child: Text(
+                      "Complete trip",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 0.04 * deviceWidth,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 0.02 * deviceHeight,
               ),

@@ -37,6 +37,7 @@ dependencies:
   smooth_page_indicator: ^0.1.5
   intl: ^0.16.1
   autocomplete_textfield: ^1.7.3
+  firebase_messaging: ^6.0.16
 
 dev_dependencies:
   flutter_test:

@@ -52,6 +52,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     await _dbHelper.createVehicleDataTable();
     await _dbHelper.createNewPlanDataTable();
     await _dbHelper.createActivePlanDataTable();
+    await _dbHelper.createCompletedPlanDataTable();
 
     // Create a UserData obj and add it to the user_data table.
     final userData = UserData(
