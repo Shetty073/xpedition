@@ -3,17 +3,22 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
+import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
 import 'package:xpedition/homepage/homepage.dart';
 import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/initial_setup_page/widgets/processing_page.dart';
 
 class InitialSetupPage extends StatefulWidget {
+
   @override
   _InitialSetupPageState createState() => _InitialSetupPageState();
 }
 
 class _InitialSetupPageState extends State<InitialSetupPage> {
+  List<NewPlanDataWithId> _activePlanData;
+  List<NewPlanDataWithId> _newPlansList;
+
   String firstName;
   String lastName;
   String vehicleName;
@@ -24,7 +29,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   double avgPriceOfOneNightAtHotel;
   int noOfMealsPerDay;
 
-  DatabaseHelper _dbHelper = DatabaseHelper();
+  DatabaseHelper _myDbHelper = DatabaseHelper();
   SharedPreferences myPref;
   bool _processing = false;
 
@@ -35,8 +40,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   TextEditingController _vehicleMileageController = TextEditingController();
   TextEditingController _fuelPricePerLitreController = TextEditingController();
   TextEditingController _avgPriceOfOneMealController = TextEditingController();
-  TextEditingController _avgPriceOfOneNightAtHotelController =
-      TextEditingController();
+  TextEditingController _avgPriceOfOneNightAtHotelController = TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
@@ -48,11 +52,11 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
 
     // NOTE: Any and all tables for our app must be created here itself
     // first create the required tables
-    await _dbHelper.createUserDataTable();
-    await _dbHelper.createVehicleDataTable();
-    await _dbHelper.createNewPlanDataTable();
-    await _dbHelper.createActivePlanDataTable();
-    await _dbHelper.createCompletedPlanDataTable();
+    await _myDbHelper.createUserDataTable();
+    await _myDbHelper.createVehicleDataTable();
+    await _myDbHelper.createNewPlanDataTable();
+    await _myDbHelper.createActivePlanDataTable();
+    await _myDbHelper.createCompletedPlanDataTable();
 
     // Create a UserData obj and add it to the user_data table.
     final userData = UserData(
@@ -64,13 +68,25 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
         avgPriceOfOneNightAtHotel: avgPriceOfOneNightAtHotel,
         noOfMealsPerDay: noOfMealsPerDay);
 
-    await _dbHelper.insertUserData(userData);
+    await _myDbHelper.insertUserData(userData);
 
     // Create a UserData obj and add it to the user_data table.
     final vehicleData =
         VehicleData(vehicleName: vehicleName, vehicleMileage: vehicleMileage);
 
-    await _dbHelper.insertVehicleData(vehicleData);
+    await _myDbHelper.insertVehicleData(vehicleData);
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _myDbHelper.getUserData().then((value) => {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            myUserDataWithId: value[0],
+          ),
+        ),
+      ),
+    });
   }
 
   Future<void> _createFromToSuggestionList() async {
@@ -95,10 +111,6 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     this.noOfMealsPerDay = int.parse(_noOfMealsPerDayController.text);
 
     _insertDataIntoDatabase();
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomePage()),
-        result: false);
   }
 
   void initSharedPref() async {
@@ -499,39 +511,39 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                           SizedBox(
                             width: 0.01 * deviceWidth,
                           ),
-                          Flexible(
-                            child: SizedBox(
-                              height: 0.07 * deviceHeight,
-                              width: 0.35 * deviceWidth,
-                              child: OutlineButton(
-                                textTheme: ButtonTextTheme.primary,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0)),
-                                child: Text(
-                                  "Do it later",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 0.04 * deviceWidth,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                borderSide: BorderSide(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .headline1
-                                      .color,
-                                ),
-                                textColor:
-                                    Theme.of(context).textTheme.headline1.color,
-                                onPressed: () {
-                                  // Go to homepage without doing anything
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => HomePage()));
-                                },
-                              ),
-                            ),
-                          ),
+//                          Flexible(
+//                            child: SizedBox(
+//                              height: 0.07 * deviceHeight,
+//                              width: 0.35 * deviceWidth,
+//                              child: OutlineButton(
+//                                textTheme: ButtonTextTheme.primary,
+//                                shape: RoundedRectangleBorder(
+//                                    borderRadius: BorderRadius.circular(10.0)),
+//                                child: Text(
+//                                  "Do it later",
+//                                  style: GoogleFonts.montserrat(
+//                                    fontSize: 0.04 * deviceWidth,
+//                                    fontWeight: FontWeight.bold,
+//                                  ),
+//                                ),
+//                                borderSide: BorderSide(
+//                                  color: Theme.of(context)
+//                                      .textTheme
+//                                      .headline1
+//                                      .color,
+//                                ),
+//                                textColor:
+//                                    Theme.of(context).textTheme.headline1.color,
+//                                onPressed: () {
+//                                  // Go to homepage without doing anything
+//                                  Navigator.push(
+//                                      context,
+//                                      MaterialPageRoute(
+//                                          builder: (context) => HomePage()));
+//                                },
+//                              ),
+//                            ),
+//                          ),
                         ],
                       ),
                     ],

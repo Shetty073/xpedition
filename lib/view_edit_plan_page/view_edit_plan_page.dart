@@ -12,14 +12,18 @@ class ViewEditPlanPage extends StatefulWidget {
   final NewPlanDataWithId newPlanDataWithId;
   final UserDataWithId userDataWithId;
   final List<VehicleDataWithId> vehicleDataWithIdList;
-  final bool isPlanActive, alreadyHasAnActivePlan;
+  final bool isPlanActive, alreadyHasAnActivePlan, isPlanComplete;
+  final VoidCallback callBackFunction;
 
-  ViewEditPlanPage(
-      {@required this.newPlanDataWithId,
-      @required this.userDataWithId,
-      @required this.vehicleDataWithIdList,
-      @required this.isPlanActive,
-      @required this.alreadyHasAnActivePlan});
+  ViewEditPlanPage({
+    @required this.newPlanDataWithId,
+    @required this.userDataWithId,
+    @required this.vehicleDataWithIdList,
+    @required this.isPlanActive,
+    @required this.alreadyHasAnActivePlan,
+    @required this.isPlanComplete,
+    @required this.callBackFunction,
+  });
 
   @override
   _ViewEditPlanPageState createState() => _ViewEditPlanPageState();
@@ -376,7 +380,8 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
     );
   }
 
-  void _displayAlreadyAnotherPlanActiveAlert(double deviceWidth, double deviceHeight) {
+  void _displayAlreadyAnotherPlanActiveAlert(
+      double deviceWidth, double deviceHeight) {
     showDialog(
       context: context,
       builder: (context) {
@@ -389,7 +394,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           ),
           content: Text(
             "How man places can you be at once? Its a rhetorical question. In this app at a time only one plan can be marked as active and it seems like"
-                " you have already marked one. In order to mark this one as active you must delete the one you have marked as active.",
+            " you have already marked one. In order to mark this one as active you must either complete the one you have marked as active or delete it.",
             style: TextStyle(
               color: Theme.of(context).textTheme.headline2.color,
             ),
@@ -501,12 +506,26 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
 
   void _deleteThisPlan() async {
     NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
-    _myDbHelper.deleteNewPlanData(newPlanDataWithId);
+    _myDbHelper.deleteNewPlanData(newPlanDataWithId).then((value) => {
+          Navigator.pop(context),
+          Navigator.pop(context),
+        });
   }
 
   void _deleteThisActivePlan() async {
     NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
-    _myDbHelper.deleteActivePlanData(newPlanDataWithId);
+    _myDbHelper
+        .deleteActivePlanData(newPlanDataWithId)
+        .then((value) => {Navigator.pop(context), Navigator.pop(context)});
+  }
+
+  void _deleteThisCompletedPlan() async {
+    NewPlanDataWithId newPlanDataWithId = _prepareDataForInsertion();
+    _myDbHelper
+        .deleteCompletedPlanData(newPlanDataWithId)
+        .then((value) => {widget.callBackFunction()});
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   void _displayDeleteAlert(double deviceWidth, double deviceHeight) {
@@ -534,9 +553,12 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                 splashColor:
                     Theme.of(context).textTheme.headline1.color.withAlpha(50),
                 onPressed: () {
-                  (widget.isPlanActive) ? _deleteThisActivePlan() : _deleteThisPlan();
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  // ignore: unnecessary_statements
+                  (!widget.isPlanComplete)
+                      ? ((widget.isPlanActive)
+                          ? _deleteThisActivePlan()
+                          : _deleteThisPlan())
+                      : _deleteThisCompletedPlan();
                 },
                 child: Text(
                   "Yes",
@@ -607,7 +629,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                 color: Theme.of(context).textTheme.headline1.color,
                 textColor: Colors.white,
                 splashColor:
-                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
                 onPressed: () {
                   _completeThisPlan();
                   Navigator.pop(context);
@@ -663,6 +685,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -700,62 +723,64 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
           ],
         ),
         actions: <Widget>[
-          (!widget.isPlanActive) ? GestureDetector(
-            onTap: () {
-              setState(() {
-                _toggleEdit = !_toggleEdit;
-              });
-              if (_toggleEdit == false) {
-                // save changes
-                _saveEveryThing();
-              }
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 0.004 * deviceWidth,
-                ),
-              ),
-              padding: EdgeInsets.only(
-                  right: 0.015 * deviceWidth,
-                  top: 0.0,
-                  bottom: 0.0,
-                  left: 0.015 * deviceWidth),
-              margin: EdgeInsets.only(
-                  right: 0.015 * deviceWidth,
-                  top: 0.03 * deviceWidth,
-                  bottom: 0.03 * deviceWidth),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  IconTheme(
-                    data: IconThemeData(
-                      color: Theme.of(context).primaryColor,
-                      size: 0.045 * deviceWidth,
-                    ),
-                    child: Icon(
-                      _toggleEdit ? Icons.save : Icons.edit,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 0.005 * deviceWidth,
-                  ),
-                  Text(
-                    _toggleEdit ? "Save" : "Edit",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
+          (!widget.isPlanActive)
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _toggleEdit = !_toggleEdit;
+                    });
+                    if (_toggleEdit == false) {
+                      // save changes
+                      _saveEveryThing();
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      border: Border.all(
                         color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 0.04 * deviceWidth,
+                        width: 0.004 * deviceWidth,
                       ),
                     ),
+                    padding: EdgeInsets.only(
+                        right: 0.015 * deviceWidth,
+                        top: 0.0,
+                        bottom: 0.0,
+                        left: 0.015 * deviceWidth),
+                    margin: EdgeInsets.only(
+                        right: 0.015 * deviceWidth,
+                        top: 0.03 * deviceWidth,
+                        bottom: 0.03 * deviceWidth),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconTheme(
+                          data: IconThemeData(
+                            color: Theme.of(context).primaryColor,
+                            size: 0.045 * deviceWidth,
+                          ),
+                          child: Icon(
+                            _toggleEdit ? Icons.save : Icons.edit,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 0.005 * deviceWidth,
+                        ),
+                        Text(
+                          _toggleEdit ? "Save" : "Edit",
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 0.04 * deviceWidth,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ) : Container(),
+                )
+              : Container(),
           GestureDetector(
             onTap: () {
               _displayDeleteAlert(deviceWidth, deviceHeight);
@@ -1136,15 +1161,17 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                 height: 0.11 * deviceHeight,
                 width: 0.92 * deviceWidth,
                 padding: EdgeInsets.only(
-                    left: 0.04 * deviceWidth,
-                    right: 0.025 * deviceWidth,
-                    top: 0.001 * deviceWidth,
-                    bottom: 0.02 * deviceWidth),
+                  left: 0.04 * deviceWidth,
+                  right: 0.025 * deviceWidth,
+                  top: 0.001 * deviceWidth,
+                  bottom: 0.02 * deviceWidth,
+                ),
                 margin: EdgeInsets.only(
-                    left: 0.04 * deviceWidth,
-                    right: 0.03 * deviceWidth,
-                    top: 0.025 * deviceWidth,
-                    bottom: 0.025 * deviceWidth),
+                  left: 0.04 * deviceWidth,
+                  right: 0.03 * deviceWidth,
+                  top: 0.025 * deviceWidth,
+                  bottom: 0.025 * deviceWidth,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).textTheme.headline4.color,
                   borderRadius: BorderRadius.circular(10.0),
@@ -1247,69 +1274,76 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                   ),
                 ),
               ),
-              (!widget.isPlanActive) ? Container(
-                child: SizedBox(
-                  height: 0.075 * deviceHeight,
-                  width: 0.35 * deviceWidth,
-                  child: FlatButton(
-                    color:
-                    Theme.of(context).textTheme.headline1.color,
-                    textColor: Colors.white,
-                    splashColor: Theme.of(context)
-                        .textTheme
-                        .headline1
-                        .color
-                        .withAlpha(50),
-                    onPressed: () {
-                      if (widget.alreadyHasAnActivePlan) {
-                        _displayAlreadyAnotherPlanActiveAlert(deviceWidth, deviceHeight);
-                      } else if (_formKey.currentState.validate()) {
-                        _displayActivateAlert(deviceWidth, deviceHeight);
-                      }
-                    },
-                    child: Text(
-                      "Activate",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 0.04 * deviceWidth,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                ),
-              ) : Container(
-                child: SizedBox(
-                  height: 0.075 * deviceHeight,
-                  width: 0.45 * deviceWidth,
-                  child: FlatButton(
-                    color:
-                    Theme.of(context).textTheme.headline1.color,
-                    textColor: Colors.white,
-                    splashColor: Theme.of(context)
-                        .textTheme
-                        .headline1
-                        .color
-                        .withAlpha(50),
-                    onPressed: () {
-                      if (_formKey.currentState.validate()) {
-                        _displayCompleteAlert(deviceWidth, deviceHeight);
-                      }
-                    },
-                    child: Text(
-                      "Complete trip",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 0.04 * deviceWidth,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                ),
-              ),
+              (!widget.isPlanComplete)
+                  ? ((!widget.isPlanActive)
+                      ? Container(
+                          child: SizedBox(
+                            height: 0.075 * deviceHeight,
+                            width: 0.35 * deviceWidth,
+                            child: FlatButton(
+                              color:
+                                  Theme.of(context).textTheme.headline1.color,
+                              textColor: Colors.white,
+                              splashColor: Theme.of(context)
+                                  .textTheme
+                                  .headline1
+                                  .color
+                                  .withAlpha(50),
+                              onPressed: () {
+                                if (widget.alreadyHasAnActivePlan) {
+                                  _displayAlreadyAnotherPlanActiveAlert(
+                                      deviceWidth, deviceHeight);
+                                } else if (_formKey.currentState.validate()) {
+                                  _displayActivateAlert(
+                                      deviceWidth, deviceHeight);
+                                }
+                              },
+                              child: Text(
+                                "Activate",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 0.04 * deviceWidth,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          child: SizedBox(
+                            height: 0.075 * deviceHeight,
+                            width: 0.45 * deviceWidth,
+                            child: FlatButton(
+                              color:
+                                  Theme.of(context).textTheme.headline1.color,
+                              textColor: Colors.white,
+                              splashColor: Theme.of(context)
+                                  .textTheme
+                                  .headline1
+                                  .color
+                                  .withAlpha(50),
+                              onPressed: () {
+                                if (_formKey.currentState.validate()) {
+                                  _displayCompleteAlert(
+                                      deviceWidth, deviceHeight);
+                                }
+                              },
+                              child: Text(
+                                "Complete trip",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 0.04 * deviceWidth,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                          ),
+                        ))
+                  : Container(),
               SizedBox(
                 height: 0.02 * deviceHeight,
               ),

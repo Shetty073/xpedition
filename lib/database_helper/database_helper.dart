@@ -1,12 +1,12 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:xpedition/data_models/new_plan_data.dart';
-import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
-import 'package:xpedition/data_models/vehicle_data.dart';
-import 'package:xpedition/data_models/user_data.dart';
-import 'package:path/path.dart';
-import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'dart:async';
 
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:xpedition/data_models/new_plan_data.dart';
+import 'package:xpedition/data_models/user_data.dart';
+import 'package:xpedition/data_models/vehicle_data.dart';
+import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 
 class DatabaseHelper {
@@ -40,7 +40,8 @@ class DatabaseHelper {
 
   Future<List<UserDataWithId>> getUserData() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> userDataMapsWithId = await db.query('user_data');
+    final List<Map<String, dynamic>> userDataMapsWithId =
+        await db.query('user_data');
     return List.generate(userDataMapsWithId.length, (i) {
       return UserDataWithId(
         id: userDataMapsWithId[i]['id'],
@@ -49,10 +50,30 @@ class DatabaseHelper {
         maxKmInOneDay: userDataMapsWithId[i]['maxKmInOneDay'],
         fuelPricePerLitre: userDataMapsWithId[i]['fuelPricePerLitre'],
         avgPriceOfOneMeal: userDataMapsWithId[i]['avgPriceOfOneMeal'],
-        avgPriceOfOneNightAtHotel: userDataMapsWithId[i]['avgPriceOfOneNightAtHotel'],
+        avgPriceOfOneNightAtHotel: userDataMapsWithId[i]
+            ['avgPriceOfOneNightAtHotel'],
         noOfMealsPerDay: userDataMapsWithId[i]['noOfMealsPerDay'],
       );
     });
+  }
+
+  Future<void> updateUserData(UserDataWithId userDataWithId) async {
+    final Database db = await database;
+    await db.update(
+      'user_data',
+      userDataWithId.toMap(),
+      where: "id = ?",
+      whereArgs: [userDataWithId.id],
+    );
+  }
+
+  Future<void> deleteUserData(UserDataWithId userDataWithId) async {
+    final Database db = await database;
+    await db.delete(
+      'user_data',
+      where: "id = ?",
+      whereArgs: [userDataWithId.id],
+    );
   }
 
   Future<void> createVehicleDataTable() async {
@@ -83,6 +104,25 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateVehicleData(VehicleDataWithId vehicleDataWithId) async {
+    final Database db = await database;
+    await db.update(
+      'vehicle_data',
+      vehicleDataWithId.toMap(),
+      where: "id = ?",
+      whereArgs: [vehicleDataWithId.id],
+    );
+  }
+
+  Future<void> deleteVehicleData(VehicleDataWithId vehicleDataWithId) async {
+    final Database db = await database;
+    await db.delete(
+      'vehicle_data',
+      where: "id = ?",
+      whereArgs: [vehicleDataWithId.id],
+    );
+  }
+
   Future<void> createNewPlanDataTable() async {
     final Database db = await database;
     db.execute(
@@ -110,12 +150,14 @@ class DatabaseHelper {
         beginDate: newPlanDataMapsWithId[i]['beginDate'],
         totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
-        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]
+            ['totalRideHotelExpense'],
         totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
         vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
-        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]
+            ['totalRideFuelRequired'],
         totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
         totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
       );
@@ -159,7 +201,7 @@ class DatabaseHelper {
   Future<List<NewPlanDataWithId>> getActivePlanData() async {
     final Database db = await database;
     final List<Map<String, dynamic>> newPlanDataMapsWithId =
-    await db.query('active_plan_data');
+        await db.query('active_plan_data');
     return List.generate(newPlanDataMapsWithId.length, (i) {
       return NewPlanDataWithId(
         id: newPlanDataMapsWithId[i]['id'],
@@ -168,12 +210,14 @@ class DatabaseHelper {
         beginDate: newPlanDataMapsWithId[i]['beginDate'],
         totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
-        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]
+            ['totalRideHotelExpense'],
         totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
         vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
-        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]
+            ['totalRideFuelRequired'],
         totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
         totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
       );
@@ -205,7 +249,8 @@ class DatabaseHelper {
         "CREATE TABLE completed_plan_data(id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, destination TEXT, beginDate TEXT, totalDistance REAL, totalNoOfDays INTEGER, totalRideHotelExpense REAL, totalnoOfMealsPerDay INTEGER, totalRideFoodExpense REAL, vehicleName TEXT, vehicleMileage REAL, totalRideFuelRequired REAL, totalRideFuelCost REAL, totalRideExpense REAL)");
   }
 
-  Future<void> insertCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+  Future<void> insertCompletedPlanData(
+      NewPlanDataWithId newPlanDataWithId) async {
     final Database db = await database;
     await db.insert(
       'completed_plan_data',
@@ -217,7 +262,7 @@ class DatabaseHelper {
   Future<List<NewPlanDataWithId>> getCompletedPlanData() async {
     final Database db = await database;
     final List<Map<String, dynamic>> newPlanDataMapsWithId =
-    await db.query('completed_plan_data');
+        await db.query('completed_plan_data');
     return List.generate(newPlanDataMapsWithId.length, (i) {
       return NewPlanDataWithId(
         id: newPlanDataMapsWithId[i]['id'],
@@ -226,19 +271,22 @@ class DatabaseHelper {
         beginDate: newPlanDataMapsWithId[i]['beginDate'],
         totalDistance: newPlanDataMapsWithId[i]['totalDistance'],
         totalNoOfDays: newPlanDataMapsWithId[i]['totalNoOfDays'],
-        totalRideHotelExpense: newPlanDataMapsWithId[i]['totalRideHotelExpense'],
+        totalRideHotelExpense: newPlanDataMapsWithId[i]
+            ['totalRideHotelExpense'],
         totalNoOfMealsPerDay: newPlanDataMapsWithId[i]['totalnoOfMealsPerDay'],
         totalRideFoodExpense: newPlanDataMapsWithId[i]['totalRideFoodExpense'],
         vehicleName: newPlanDataMapsWithId[i]['vehicleName'],
         vehicleMileage: newPlanDataMapsWithId[i]['vehicleMileage'],
-        totalRideFuelRequired: newPlanDataMapsWithId[i]['totalRideFuelRequired'],
+        totalRideFuelRequired: newPlanDataMapsWithId[i]
+            ['totalRideFuelRequired'],
         totalRideFuelCost: newPlanDataMapsWithId[i]['totalRideFuelCost'],
         totalRideExpense: newPlanDataMapsWithId[i]['totalRideExpense'],
       );
     });
   }
 
-  Future<void> updateCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+  Future<void> updateCompletedPlanData(
+      NewPlanDataWithId newPlanDataWithId) async {
     final Database db = await database;
     await db.update(
       'completed_plan_data',
@@ -248,7 +296,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> deleteCompletedPlanData(NewPlanDataWithId newPlanDataWithId) async {
+  Future<void> deleteCompletedPlanData(
+      NewPlanDataWithId newPlanDataWithId) async {
     final Database db = await database;
     await db.delete(
       'completed_plan_data',
@@ -256,5 +305,4 @@ class DatabaseHelper {
       whereArgs: [newPlanDataWithId.id],
     );
   }
-
 }

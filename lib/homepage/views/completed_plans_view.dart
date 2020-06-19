@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/views/widgets/plan_card.dart';
 
 class CompletedPlansView extends StatefulWidget {
@@ -12,6 +13,8 @@ class CompletedPlansView extends StatefulWidget {
 }
 
 class _CompletedPlansViewState extends State<CompletedPlansView> {
+  List<NewPlanDataWithId> _completedPlanDataList;
+  DatabaseHelper _myDbHelper;
   bool _hasActivePlan = false;
 
   int getHours(double distance) {
@@ -27,9 +30,15 @@ class _CompletedPlansViewState extends State<CompletedPlansView> {
     return int.parse(res[1]);
   }
 
+  void _updateListViewData() async {
+    _completedPlanDataList = await _myDbHelper.getCompletedPlanData();
+  }
+
   @override
   void initState() {
     super.initState();
+    _myDbHelper = DatabaseHelper();
+    _completedPlanDataList = widget.completedPlanDataList;
   }
 
   @override
@@ -38,47 +47,44 @@ class _CompletedPlansViewState extends State<CompletedPlansView> {
     double deviceWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  padding: EdgeInsets.only(right: 0.026 * deviceWidth),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  "Completed trips",
+                  style: GoogleFonts.montserrat(
+                    textStyle: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0.0,
+        ),
         body: Column(
           children: <Widget>[
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back_ios,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(
-                    width: 0.1 * deviceWidth,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(
-                left: 0.025 * deviceWidth,
-                right: 0.025 * deviceWidth,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    " Completed trips:",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 0.05 * deviceWidth,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+
             Container(
               height: 0.85 * deviceHeight,
               padding: EdgeInsets.only(
@@ -87,26 +93,30 @@ class _CompletedPlansViewState extends State<CompletedPlansView> {
                 top: 0.001 * deviceWidth,
                 bottom: 0.025 * deviceWidth,
               ),
-              child: (widget.completedPlanDataList.length > 0) ? ListView.builder(
-                itemCount: widget.completedPlanDataList.length,
+              child: (_completedPlanDataList.length > 0) ? ListView.builder(
+                itemCount: _completedPlanDataList.length,
                 itemBuilder: (context, i) {
                   return PlanCard(
-                    newPlanDataWithId:
-                    widget.completedPlanDataList[i],
-                    source: widget.completedPlanDataList[i].source,
-                    destination: widget.completedPlanDataList[i].destination,
-                    beginDate: widget.completedPlanDataList[i].beginDate,
-                    hrs: getHours(widget.completedPlanDataList[i]
+                    newPlanDataWithId: _completedPlanDataList[i],
+                    source: _completedPlanDataList[i].source,
+                    destination: _completedPlanDataList[i].destination,
+                    beginDate: _completedPlanDataList[i].beginDate,
+                    hrs: getHours(_completedPlanDataList[i]
                         .totalDistance),
-                    mins: getMins(widget.completedPlanDataList[i]
+                    mins: getMins(_completedPlanDataList[i]
                         .totalDistance),
-                    days: widget.completedPlanDataList[i]
+                    days: _completedPlanDataList[i]
                         .totalNoOfDays,
-                    totalDistance: widget.completedPlanDataList[i]
+                    totalDistance: _completedPlanDataList[i]
                         .totalDistance,
                     isPlanActive: false,
-                    alreadyHasAnActivePlan:
-                    _hasActivePlan,
+                    isPlanComplete: true,
+                    alreadyHasAnActivePlan: _hasActivePlan,
+                    callBackFunction: () {
+                      setState(() {
+                        _updateListViewData();
+                      });
+                    },
                   );
                 },
               ) : Container(

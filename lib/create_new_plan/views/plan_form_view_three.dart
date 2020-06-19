@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xpedition/data_models/new_plan_data.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/homepage.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class PlanFormViewThree extends StatefulWidget {
   final TextEditingController fromLocationController,
@@ -215,9 +215,16 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     // insertNewPlanData() requires a NewPlanData object as parameter
     // _prepareDataForInsertion() will return a NewPlanData object
     NewPlanData newPlanData = _prepareDataForInsertion();
-    _dbHelper.insertNewPlanData(newPlanData).then((value) =>
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage())));
+    _dbHelper.insertNewPlanData(newPlanData).then((value) => {
+          _dbHelper.getUserData().then((userDataList) => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    myUserDataWithId: userDataList[0],
+                  ),
+                ),
+              )),
+        });
     Navigator.pop(context);
   }
 

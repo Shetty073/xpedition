@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/homepage.dart';
 import 'package:xpedition/initial_setup_page/initial_setup_page.dart';
 
@@ -12,33 +13,47 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   SharedPreferences myPref;
+  DatabaseHelper _myDbHelper;
 
   void checkIfInitSetupComplete() async {
     // using SharedPreferences check whether this is the first time app is opened
     myPref = await SharedPreferences.getInstance();
     bool flag = myPref.containsKey("app_init");
     if (flag) {
-      Future.delayed(const Duration(microseconds: 2500), () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(),
-            ));
-      });
+      Future.delayed(
+        const Duration(microseconds: 2500),
+        () {
+          _myDbHelper.getUserData().then((value) => {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  myUserDataWithId: value[0],
+                ),
+              ),
+            ),
+          });
+        },
+      );
     } else {
-      Future.delayed(const Duration(microseconds: 800), () {
-        Navigator.pushReplacement(
+      Future.delayed(
+        const Duration(microseconds: 800),
+        () {
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => InitialSetupPage(),
-            ));
-      });
+            ),
+          );
+        },
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _myDbHelper = DatabaseHelper();
     checkIfInitSetupComplete();
   }
 

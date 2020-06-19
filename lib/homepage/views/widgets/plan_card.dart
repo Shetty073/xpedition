@@ -12,7 +12,8 @@ class PlanCard extends StatefulWidget {
   final String source, destination, beginDate;
   final int hrs, mins, days;
   final double totalDistance;
-  final bool isPlanActive, alreadyHasAnActivePlan;
+  final bool isPlanActive, alreadyHasAnActivePlan, isPlanComplete;
+  final VoidCallback callBackFunction;
 
   PlanCard(
       {@required this.newPlanDataWithId,
@@ -24,7 +25,9 @@ class PlanCard extends StatefulWidget {
       @required this.days,
       @required this.totalDistance,
       @required this.isPlanActive,
-      @required this.alreadyHasAnActivePlan});
+      @required this.alreadyHasAnActivePlan,
+      @required this.isPlanComplete,
+      @required this.callBackFunction});
 
   @override
   _PlanCardState createState() => _PlanCardState();
@@ -46,16 +49,22 @@ class _PlanCardState extends State<PlanCard> {
   }
 
   void _openViewEditPlanPage(List<VehicleDataWithId> vehicleDataWithIdList) {
-    _getUserDataWithId().then((value) => Navigator.push(
+    _getUserDataWithId().then(
+      (value) => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => ViewEditPlanPage(
-              newPlanDataWithId: widget.newPlanDataWithId,
-              userDataWithId: value,
-              vehicleDataWithIdList: vehicleDataWithIdList,
-              isPlanActive: widget.isPlanActive,
-              alreadyHasAnActivePlan: widget.alreadyHasAnActivePlan,
-            ))));
+          builder: (context) => ViewEditPlanPage(
+            newPlanDataWithId: widget.newPlanDataWithId,
+            userDataWithId: value,
+            vehicleDataWithIdList: vehicleDataWithIdList,
+            isPlanActive: widget.isPlanActive,
+            alreadyHasAnActivePlan: widget.alreadyHasAnActivePlan,
+            isPlanComplete: widget.isPlanComplete,
+            callBackFunction: widget.callBackFunction,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -70,7 +79,8 @@ class _PlanCardState extends State<PlanCard> {
     double deviceWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
-        _getVehicleDataWithIdList().then((value) => _openViewEditPlanPage(value));
+        _getVehicleDataWithIdList()
+            .then((value) => _openViewEditPlanPage(value));
       },
       child: Container(
         height: 0.17 * deviceHeight,
@@ -199,7 +209,9 @@ class _PlanCardState extends State<PlanCard> {
                             ),
                             Flexible(
                               child: Text(
-                                widget.days > 1 ? "${widget.days} days" : "${widget.days} day",
+                                widget.days > 1
+                                    ? "${widget.days} days"
+                                    : "${widget.days} day",
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.montserrat(
                                   textStyle: TextStyle(

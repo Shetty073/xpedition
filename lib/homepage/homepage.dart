@@ -10,9 +10,11 @@ import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/views/completed_plans_view.dart';
 import 'package:xpedition/homepage/views/plans_view.dart';
 import 'package:xpedition/homepage/views/settings_view.dart';
-import 'package:xpedition/initial_setup_page/initial_setup_page.dart';
 
 class HomePage extends StatefulWidget {
+  final UserDataWithId myUserDataWithId;
+  HomePage({@required this.myUserDataWithId});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -30,22 +32,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   );
 
   void _pageChanged(int index) {
-    _myDbHelper.getUserData().then((value) => {
-          _myUserDataWithId = value[0],
-          setState(() {
-            _currPageIndex = index;
-            if (_currPageIndex == 1) {
-              if (!_myPref.containsKey("complete_init_setup")) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => InitialSetupPage(),
-                  ),
-                );
-              }
-            }
-          }),
-        });
+    setState(() {
+      _currPageIndex = index;
+    });
   }
 
   void _initSharedPref() async {
@@ -124,6 +113,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _initSharedPref();
+    _myUserDataWithId = widget.myUserDataWithId;
     _currPageIndex = 0;
     _myDbHelper = DatabaseHelper();
     _fcm.configure(
@@ -244,17 +234,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           onPressed: () {
             // go to create new plan page
-            if (!_myPref.containsKey("complete_init_setup")) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => InitialSetupPage()));
-            } else {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CreateNewPlan(
-                            myPref: _myPref,
-                          )));
-            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateNewPlan(
+                  myPref: _myPref,
+                ),
+              ),
+            );
           },
         ),
         bottomNavigationBar: BottomAppBar(
@@ -297,11 +284,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     iconSize: 0.08 * deviceWidth,
                     onPressed: () {
                       // settings view
-                      setState(() {
-                        _pageController.animateToPage(1,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease);
-                      });
+                      setState(
+                        () {
+                          _pageController.animateToPage(1,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                        },
+                      );
                     },
                   ),
                 ),

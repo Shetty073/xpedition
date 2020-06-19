@@ -14,6 +14,7 @@ class _PlansViewState extends State<PlansView> {
   QueryHelper _queryHelper = QueryHelper();
   SharedPreferences myPref;
   bool _isInitialSetupCompleteKey;
+  bool _firstLaunch;
   bool _hasActivePlan = false;
 
   // When we use google maps offline, google uses the following formula to
@@ -39,6 +40,20 @@ class _PlansViewState extends State<PlansView> {
     });
   }
 
+  Widget _firstLaunchRefresh(double deviceWidth) {
+    Future.delayed(Duration(seconds: 2), () {
+      if(this.mounted) {
+        setState(() {
+          // NOTE: This is kept empty on purpose
+        });
+      }
+    });
+    return SpinKitWave(
+      color: Theme.of(context).primaryColor,
+      size: 0.1 * deviceWidth,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -50,12 +65,13 @@ class _PlansViewState extends State<PlansView> {
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
-    return (_isInitialSetupCompleteKey) ? Container(
+    return Container(
       padding: EdgeInsets.only(
           left: 0.025 * deviceWidth,
           right: 0.025 * deviceWidth,
           top: 0.025 * deviceWidth,
-          bottom: 0.025 * deviceWidth),
+          bottom: 0.005 * deviceWidth,
+      ),
       child: Column(
         children: <Widget>[
           FutureBuilder(
@@ -85,7 +101,9 @@ class _PlansViewState extends State<PlansView> {
                       days: snapshot.data[0].totalNoOfDays,
                       totalDistance: snapshot.data[0].totalDistance,
                       isPlanActive: true,
+                      isPlanComplete: false,
                       alreadyHasAnActivePlan: _hasActivePlan,
+                      callBackFunction: () {},
                     ),
                     width: deviceWidth,
                   ),
@@ -120,23 +138,18 @@ class _PlansViewState extends State<PlansView> {
                           itemCount: snapshot.data.length,
                           itemBuilder: (context, i) {
                             return PlanCard(
-                              newPlanDataWithId:
-                                  snapshot.data[i],
+                              newPlanDataWithId: snapshot.data[i],
                               source: snapshot.data[i].source,
-                              destination:
-                                  snapshot.data[i].destination,
-                              beginDate:
-                                  snapshot.data[i].beginDate,
-                              hrs: getHours(snapshot
-                                  .data[i].totalDistance),
-                              mins: getMins(snapshot
-                                  .data[i].totalDistance),
-                              days: snapshot
-                                  .data[i].totalNoOfDays,
-                              totalDistance: snapshot
-                                  .data[i].totalDistance,
+                              destination: snapshot.data[i].destination,
+                              beginDate: snapshot.data[i].beginDate,
+                              hrs: getHours(snapshot.data[i].totalDistance),
+                              mins: getMins(snapshot.data[i].totalDistance),
+                              days: snapshot.data[i].totalNoOfDays,
+                              totalDistance: snapshot.data[i].totalDistance,
                               isPlanActive: false,
+                              isPlanComplete: false,
                               alreadyHasAnActivePlan: _hasActivePlan,
+                              callBackFunction: () {},
                             );
                           },
                         ),
@@ -151,7 +164,7 @@ class _PlansViewState extends State<PlansView> {
                         CrossAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        "No plans to show.",
+                        "No new plans to show.",
                         style: TextStyle(
                           color: Theme.of(context)
                               .textTheme
@@ -175,23 +188,12 @@ class _PlansViewState extends State<PlansView> {
                   ),
                 )
                 )
-            : SpinKitWave(
-                color: Theme.of(context).primaryColor,
-                size: 0.1 * deviceWidth,
-              );
+            : _firstLaunchRefresh(deviceWidth);
             },
           ),
         ),
       ],
     ),
-    )
-    : Center(
-        child: Text(
-          "Please first complete initial setup.",
-          style: TextStyle(
-            color: Theme.of(context).textTheme.headline2.color,
-          ),
-        ),
-      );
+    );
   }
 }
