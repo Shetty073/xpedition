@@ -23,15 +23,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
       Future.delayed(
         const Duration(microseconds: 2500),
         () {
-          _myDbHelper.getUserData().then((value) => {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  myUserDataWithId: value[0],
+          _myDbHelper.getUserData().then((userDataList) => {
+            _myDbHelper.getVehicleData().then((vehicleDataList) => {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    myUserDataWithId: userDataList[0],
+                    vehicleDataWithIdList: vehicleDataList,
+                  ),
                 ),
               ),
-            ),
+            }),
           });
         },
       );

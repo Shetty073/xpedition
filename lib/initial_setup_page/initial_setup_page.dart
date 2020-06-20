@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/data_models/with_id/new_plan_data_with_id.dart';
-import 'package:xpedition/homepage/homepage.dart';
-import 'package:xpedition/data_models/user_data.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
+import 'package:xpedition/homepage/homepage.dart';
 import 'package:xpedition/initial_setup_page/widgets/processing_page.dart';
 
 class InitialSetupPage extends StatefulWidget {
-
   @override
   _InitialSetupPageState createState() => _InitialSetupPageState();
 }
@@ -40,7 +39,8 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
   TextEditingController _vehicleMileageController = TextEditingController();
   TextEditingController _fuelPricePerLitreController = TextEditingController();
   TextEditingController _avgPriceOfOneMealController = TextEditingController();
-  TextEditingController _avgPriceOfOneNightAtHotelController = TextEditingController();
+  TextEditingController _avgPriceOfOneNightAtHotelController =
+      TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
@@ -77,16 +77,19 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
     await _myDbHelper.insertVehicleData(vehicleData);
 
     Navigator.of(context).popUntil((route) => route.isFirst);
-    _myDbHelper.getUserData().then((value) => {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            myUserDataWithId: value[0],
-          ),
-        ),
-      ),
-    });
+    _myDbHelper.getUserData().then((userDataList) => {
+          _myDbHelper.getVehicleData().then(
+                (vehicleDataWithIdList) => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(
+                      myUserDataWithId: userDataList[0],
+                      vehicleDataWithIdList: vehicleDataWithIdList,
+                    ),
+                  ),
+                ),
+              ),
+        });
   }
 
   Future<void> _createFromToSuggestionList() async {
@@ -508,42 +511,6 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 0.01 * deviceWidth,
-                          ),
-//                          Flexible(
-//                            child: SizedBox(
-//                              height: 0.07 * deviceHeight,
-//                              width: 0.35 * deviceWidth,
-//                              child: OutlineButton(
-//                                textTheme: ButtonTextTheme.primary,
-//                                shape: RoundedRectangleBorder(
-//                                    borderRadius: BorderRadius.circular(10.0)),
-//                                child: Text(
-//                                  "Do it later",
-//                                  style: GoogleFonts.montserrat(
-//                                    fontSize: 0.04 * deviceWidth,
-//                                    fontWeight: FontWeight.bold,
-//                                  ),
-//                                ),
-//                                borderSide: BorderSide(
-//                                  color: Theme.of(context)
-//                                      .textTheme
-//                                      .headline1
-//                                      .color,
-//                                ),
-//                                textColor:
-//                                    Theme.of(context).textTheme.headline1.color,
-//                                onPressed: () {
-//                                  // Go to homepage without doing anything
-//                                  Navigator.push(
-//                                      context,
-//                                      MaterialPageRoute(
-//                                          builder: (context) => HomePage()));
-//                                },
-//                              ),
-//                            ),
-//                          ),
                         ],
                       ),
                     ],

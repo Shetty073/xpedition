@@ -6,6 +6,7 @@ import 'package:outline_material_icons/outline_material_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xpedition/create_new_plan/create_new_plan.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 import 'package:xpedition/homepage/views/completed_plans_view.dart';
 import 'package:xpedition/homepage/views/plans_view.dart';
@@ -13,7 +14,10 @@ import 'package:xpedition/homepage/views/settings_view.dart';
 
 class HomePage extends StatefulWidget {
   final UserDataWithId myUserDataWithId;
-  HomePage({@required this.myUserDataWithId});
+  final List<VehicleDataWithId> vehicleDataWithIdList;
+
+  HomePage(
+      {@required this.myUserDataWithId, @required this.vehicleDataWithIdList});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -22,8 +26,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _currPageIndex;
   SharedPreferences _myPref;
+  List<VehicleDataWithId> _myVehicleDataWithIdList;
   UserDataWithId _myUserDataWithId;
   DatabaseHelper _myDbHelper;
+  bool _updateVehicleDataFlag = false;
 
   final FirebaseMessaging _fcm = FirebaseMessaging();
 
@@ -82,37 +88,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-//            ButtonTheme(
-//              child: OutlineButton(
-//                textTheme: ButtonTextTheme.primary,
-//                shape: RoundedRectangleBorder(
-//                    borderRadius: BorderRadius.circular(10.0)),
-//                child: Text(
-//                  "Cancel",
-//                  style: GoogleFonts.montserrat(
-//                    fontSize: 0.04 * deviceWidth,
-//                    fontWeight: FontWeight.bold,
-//                  ),
-//                ),
-//                borderSide: BorderSide(
-//                  color: Theme.of(context).textTheme.headline1.color,
-//                ),
-//                textColor: Theme.of(context).textTheme.headline1.color,
-//                onPressed: () {
-//                  Navigator.pop(context);
-//                },
-//              ),
-//            ),
           ],
         );
       },
     );
   }
 
+  void _updateData() async {
+    _updateVehicleDataFlag = true;
+    List<UserDataWithId> _myUserDataWithIdList =
+        await _myDbHelper.getUserData();
+    _myUserDataWithId = _myUserDataWithIdList[0];
+    _myVehicleDataWithIdList = await _myDbHelper.getVehicleData();
+  }
+
   @override
   void initState() {
     super.initState();
     _initSharedPref();
+    if (!_updateVehicleDataFlag) {
+      _myVehicleDataWithIdList = widget.vehicleDataWithIdList;
+    }
     _myUserDataWithId = widget.myUserDataWithId;
     _currPageIndex = 0;
     _myDbHelper = DatabaseHelper();
@@ -173,14 +169,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                       padding: EdgeInsets.only(
-                          right: 0.015 * deviceWidth,
-                          top: 0.0,
-                          bottom: 0.0,
-                          left: 0.015 * deviceWidth),
+                        right: 0.015 * deviceWidth,
+                        top: 0.0,
+                        bottom: 0.0,
+                        left: 0.015 * deviceWidth,
+                      ),
                       margin: EdgeInsets.only(
-                          right: 0.015 * deviceWidth,
-                          top: 0.03 * deviceWidth,
-                          bottom: 0.03 * deviceWidth),
+                        right: 0.015 * deviceWidth,
+                        top: 0.03 * deviceWidth,
+                        bottom: 0.03 * deviceWidth,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
@@ -218,12 +216,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             PlansView(),
             SettingsView(
               myUserDataWithId: _myUserDataWithId,
+              vehicleDataWithIdList: _myVehicleDataWithIdList,
+              callBackFunction: _updateData,
             ),
           ],
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: (_currPageIndex == 0) ? FloatingActionButton(
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           splashColor: Theme.of(context).secondaryHeaderColor.withAlpha(50),
           child: IconTheme(
@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             );
           },
-        ),
+        ) : null,
         bottomNavigationBar: BottomAppBar(
           shape: CircularNotchedRectangle(),
           notchMargin: 4.0,

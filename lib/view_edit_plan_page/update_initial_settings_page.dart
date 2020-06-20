@@ -1,39 +1,138 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpedition/data_models/vehicle_data.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
+import 'package:xpedition/data_models/with_id/vehicle_data_with_id.dart';
 import 'package:xpedition/database_helper/database_helper.dart';
 
 class UpdateInitialSettingsPage extends StatefulWidget {
+  final UserDataWithId userDataWithId;
   final VoidCallback callBackFunction;
+  final List<VehicleDataWithId> vehicleDataWithIdList;
 
-  UpdateInitialSettingsPage({@required this.callBackFunction});
+  UpdateInitialSettingsPage(
+      {@required this.userDataWithId,
+      @required this.callBackFunction,
+      @required this.vehicleDataWithIdList});
 
   @override
-  _UpdateInitialSettingsPageState createState() => _UpdateInitialSettingsPageState();
+  _UpdateInitialSettingsPageState createState() =>
+      _UpdateInitialSettingsPageState();
 }
 
 class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
+  final _formKey = GlobalKey<FormState>();
+
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
-  TextEditingController _vehicleNameController = TextEditingController();
   TextEditingController _maxKmInOneDayController = TextEditingController();
-  TextEditingController _vehicleMileageController = TextEditingController();
   TextEditingController _fuelPricePerLitreController = TextEditingController();
   TextEditingController _avgPriceOfOneMealController = TextEditingController();
-  TextEditingController _avgPriceOfOneNightAtHotelController = TextEditingController();
+  TextEditingController _avgPriceOfOneNightAtHotelController =
+      TextEditingController();
   TextEditingController _noOfMealsPerDayController = TextEditingController();
+
+  TextEditingController _vehicleNameControllerOne = TextEditingController();
+  TextEditingController _vehicleMileageControllerOne = TextEditingController();
+  TextEditingController _vehicleNameControllerTwo = TextEditingController();
+  TextEditingController _vehicleMileageControllerTwo = TextEditingController();
+  TextEditingController _vehicleNameControllerThree = TextEditingController();
+  TextEditingController _vehicleMileageControllerThree =
+      TextEditingController();
+  TextEditingController _vehicleNameControllerFour = TextEditingController();
+  TextEditingController _vehicleMileageControllerFour = TextEditingController();
+  TextEditingController _vehicleNameControllerFive = TextEditingController();
+  TextEditingController _vehicleMileageControllerFive = TextEditingController();
 
   bool _toggleEdit = false;
   DatabaseHelper _myDbHelper;
+  List<TextEditingController> _vehicleNameControllerList;
+  List<TextEditingController> _vehicleMileageControllerList;
 
-  UserDataWithId _prepareDataForInsertion() {
+  void _setOldData() {
+    _vehicleNameControllerList = [
+      _vehicleNameControllerOne,
+      _vehicleNameControllerTwo,
+      _vehicleNameControllerThree,
+      _vehicleNameControllerFour,
+      _vehicleNameControllerFive,
+    ];
+    _vehicleMileageControllerList = [
+      _vehicleMileageControllerOne,
+      _vehicleMileageControllerTwo,
+      _vehicleMileageControllerThree,
+      _vehicleMileageControllerFour,
+      _vehicleMileageControllerFive,
+    ];
 
+    _firstNameController.text = widget.userDataWithId.firstName;
+    _lastNameController.text = widget.userDataWithId.lastName;
+    _maxKmInOneDayController.text =
+        widget.userDataWithId.maxKmInOneDay.toString();
+    _fuelPricePerLitreController.text =
+        widget.userDataWithId.fuelPricePerLitre.toStringAsFixed(2);
+    _avgPriceOfOneMealController.text =
+        widget.userDataWithId.avgPriceOfOneMeal.toStringAsFixed(2);
+    _avgPriceOfOneNightAtHotelController.text =
+        widget.userDataWithId.avgPriceOfOneNightAtHotel.toStringAsFixed(2);
+    _noOfMealsPerDayController.text =
+        widget.userDataWithId.noOfMealsPerDay.toString();
+
+    for (int i = 0; i < widget.vehicleDataWithIdList.length; i++) {
+      _vehicleNameControllerList[i].text =
+          widget.vehicleDataWithIdList[i].vehicleName;
+      _vehicleMileageControllerList[i].text =
+          widget.vehicleDataWithIdList[i].vehicleMileage.toStringAsFixed(2);
+    }
+  }
+
+  UserDataWithId _prepareUserDataForInsertion() {
+    return UserDataWithId(
+      id: widget.userDataWithId.id,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      maxKmInOneDay: int.parse(_maxKmInOneDayController.text.trim()),
+      fuelPricePerLitre: double.parse(_fuelPricePerLitreController.text.trim()),
+      avgPriceOfOneMeal: double.parse(_avgPriceOfOneMealController.text.trim()),
+      avgPriceOfOneNightAtHotel:
+          double.parse(_avgPriceOfOneNightAtHotelController.text.trim()),
+      noOfMealsPerDay: int.parse(_noOfMealsPerDayController.text.trim()),
+    );
+  }
+
+  List<VehicleData> _prepareVehicleDataForInsertion() {
+    widget.vehicleDataWithIdList.forEach((vehicleData) {
+      _myDbHelper.deleteVehicleData(vehicleData);
+    });
+
+    List<VehicleData> newVehicleDataList = [];
+
+    for (int i = 0; i < 5; i++) {
+      if (_vehicleMileageControllerList[i].text.trim() != "" &&
+          _vehicleMileageControllerList[i].text.trim() != "") {
+        newVehicleDataList.add(
+          VehicleData(
+            vehicleName: _vehicleNameControllerList[i].text.trim(),
+            vehicleMileage: double.parse(_vehicleMileageControllerList[i].text),
+          ),
+        );
+      }
+    }
+    return newVehicleDataList;
   }
 
   void _saveEveryThing() async {
-    UserDataWithId newPlanDataWithId = _prepareDataForInsertion();
-    //_myDbHelper.updateNewPlanData(newPlanDataWithId);
+    UserDataWithId newPlanDataWithId = _prepareUserDataForInsertion();
+    _myDbHelper.updateUserData(newPlanDataWithId);
+
+    List<VehicleData> newVehicleDataList = _prepareVehicleDataForInsertion();
+    newVehicleDataList.forEach((vehicleData) {
+      _myDbHelper.insertVehicleData(vehicleData);
+    });
+
+    widget.callBackFunction();
   }
 
   void _displaySaveAlert(double deviceWidth, double deviceHeight) {
@@ -49,7 +148,7 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
           ),
           content: Text(
             "Do you want to save the edits you made to this plan? If you select No"
-                " then all changes will be lost. This action cannot be undone.",
+            " then all changes will be lost. This action cannot be undone.",
             style: TextStyle(
               color: Theme.of(context).textTheme.headline2.color,
             ),
@@ -60,7 +159,7 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
                 color: Theme.of(context).textTheme.headline1.color,
                 textColor: Colors.white,
                 splashColor:
-                Theme.of(context).textTheme.headline1.color.withAlpha(50),
+                    Theme.of(context).textTheme.headline1.color.withAlpha(50),
                 onPressed: () {
                   _saveEveryThing();
                   Navigator.pop(context);
@@ -111,6 +210,7 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
   void initState() {
     super.initState();
     _myDbHelper = DatabaseHelper();
+    _setOldData();
   }
 
   @override
@@ -129,9 +229,11 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
             children: <Widget>[
               GestureDetector(
                 onTap: () {
-                  _toggleEdit
-                      ? _displaySaveAlert(deviceWidth, deviceHeight)
-                      : Navigator.pop(context);
+                  if (_formKey.currentState.validate()) {
+                    _toggleEdit
+                        ? _displaySaveAlert(deviceWidth, deviceHeight)
+                        : Navigator.pop(context);
+                  }
                 },
                 child: Container(
                   padding: EdgeInsets.only(right: 0.026 * deviceWidth),
@@ -143,7 +245,7 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
               ),
               Flexible(
                 child: Text(
-                  "User data",
+                  "Manage user data",
                   style: GoogleFonts.montserrat(
                     textStyle: TextStyle(
                       color: Theme.of(context).primaryColor,
@@ -161,9 +263,12 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
                 setState(() {
                   _toggleEdit = !_toggleEdit;
                 });
-                if (_toggleEdit == false) {
-                  // save changes
-                  _saveEveryThing();
+
+                if (_formKey.currentState.validate()) {
+                  if (_toggleEdit == false) {
+                    // save changes
+                    _saveEveryThing();
+                  }
                 }
               },
               child: Container(
@@ -219,253 +324,398 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Container(
-            padding: EdgeInsets.only(left: 0.025 * deviceWidth, right: 0.025 * deviceWidth),
+            padding: EdgeInsets.only(
+                left: 0.025 * deviceWidth, right: 0.025 * deviceWidth),
             child: Column(
               children: <Widget>[
-                SizedBox(
-                  height: 0.02 * deviceHeight,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Flexible(
-                      child: TextFormField(
-                        controller: _firstNameController,
-                        decoration: InputDecoration(
-                          hintText: "First name",
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return "Please enter your first name";
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.text,
-                        autocorrect: true,
-                        autofocus: false,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .color,
-                          ),
-                        ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 0.02 * deviceHeight,
                       ),
-                    ),
-                    SizedBox(
-                      width: 0.03 * deviceWidth,
-                    ),
-                    Flexible(
-                      child: TextFormField(
-                        controller: _lastNameController,
-                        decoration: InputDecoration(
-                          hintText: "Last name",
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  "First name:",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                      fontSize: 0.035 * deviceWidth,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextFormField(
+                                  enabled: _toggleEdit,
+                                  controller: _firstNameController,
+                                  decoration: InputDecoration(
+                                    hintText: "First name",
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value.trim().isEmpty) {
+                                      return "Please enter your first name";
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.text,
+                                  autocorrect: true,
+                                  autofocus: false,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return "Please enter your last name";
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.text,
-                        autocorrect: true,
-                        autofocus: false,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .color,
+                          SizedBox(
+                            width: 0.03 * deviceWidth,
                           ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 0.015 * deviceHeight,
-                ),
-                TextFormField(
-                  controller: _maxKmInOneDayController,
-                  decoration: InputDecoration(
-                    hintText: "Max KM you can travel in a day",
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor),
-                    ),
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    WhitelistingTextInputFormatter.digitsOnly
-                  ],
-                  validator: (value) {
-                    if (value.trim().isEmpty) {
-                      return "This field cannot be empty";
-                    }
-                    return null;
-                  },
-                  keyboardType: TextInputType.number,
-                  autocorrect: true,
-                  autofocus: false,
-                  style: GoogleFonts.montserrat(
-                    textStyle: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText1.color,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 0.015 * deviceHeight,
-                ),
-                TextFormField(
-                  controller: _fuelPricePerLitreController,
-                  decoration: InputDecoration(
-                    hintText: "Fuel price/litre",
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor),
-                    ),
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    WhitelistingTextInputFormatter(
-                        RegExp(r"^\d+(\.\d*)?")),
-                  ],
-                  validator: (value) {
-                    if (value.trim().isEmpty) {
-                      return "This field cannot be empty";
-                    }
-                    return null;
-                  },
-                  keyboardType: TextInputType.number,
-                  autocorrect: true,
-                  autofocus: false,
-                  style: GoogleFonts.montserrat(
-                    textStyle: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyText1
-                          .color,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 0.015 * deviceHeight,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Flexible(
-                      child: TextFormField(
-                        controller: _avgPriceOfOneMealController,
-                        decoration: InputDecoration(
-                          hintText: "Avg. price of a meal",
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  "Last name:",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                      fontSize: 0.035 * deviceWidth,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextFormField(
+                                  enabled: _toggleEdit,
+                                  controller: _lastNameController,
+                                  decoration: InputDecoration(
+                                    hintText: "Last name",
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value.trim().isEmpty) {
+                                      return "Please enter your last name";
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.text,
+                                  autocorrect: true,
+                                  autofocus: false,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
-                              RegExp(r"^\d+(\.\d*)?")),
                         ],
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return "This field cannot be empty";
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        autocorrect: true,
-                        autofocus: false,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .color,
-                          ),
-                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 0.03 * deviceWidth,
-                    ),
-                    Flexible(
-                      child: TextFormField(
-                        controller: _avgPriceOfOneNightAtHotelController,
-                        decoration: InputDecoration(
-                          hintText: "Price of hotel/night",
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor),
+                      SizedBox(
+                        height: 0.03 * deviceHeight,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "Max KM you can travel in a day:",
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                                fontSize: 0.035 * deviceWidth,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                        inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
-                              RegExp(r"^\d+(\.\d*)?")),
+                          TextFormField(
+                            enabled: _toggleEdit,
+                            controller: _maxKmInOneDayController,
+                            decoration: InputDecoration(
+                              hintText: "Max KM you can travel in a day",
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ),
+                            inputFormatters: <TextInputFormatter>[
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            validator: (value) {
+                              if (value.trim().isEmpty) {
+                                return "This field cannot be empty";
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            autocorrect: true,
+                            autofocus: false,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                              ),
+                            ),
+                          ),
                         ],
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return "This field cannot be empty";
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        autocorrect: true,
-                        autofocus: false,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .color,
-                          ),
-                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 0.015 * deviceHeight,
-                ),
-                TextFormField(
-                  controller: _noOfMealsPerDayController,
-                  decoration: InputDecoration(
-                    hintText: "No. of meals/day",
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor),
-                    ),
+                      SizedBox(
+                        height: 0.03 * deviceHeight,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  "Avg. price of a meal:",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                      fontSize: 0.035 * deviceWidth,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextFormField(
+                                  enabled: _toggleEdit,
+                                  controller: _avgPriceOfOneMealController,
+                                  decoration: InputDecoration(
+                                    hintText: "Avg. price of a meal",
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                  inputFormatters: <TextInputFormatter>[
+                                    WhitelistingTextInputFormatter(
+                                        RegExp(r"^\d+(\.\d*)?")),
+                                  ],
+                                  validator: (value) {
+                                    if (value.trim().isEmpty) {
+                                      return "This field cannot be empty";
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.number,
+                                  autocorrect: true,
+                                  autofocus: false,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 0.03 * deviceWidth,
+                          ),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  "Price of hotel/night:",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                      fontSize: 0.035 * deviceWidth,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextFormField(
+                                  enabled: _toggleEdit,
+                                  controller:
+                                      _avgPriceOfOneNightAtHotelController,
+                                  decoration: InputDecoration(
+                                    hintText: "Price of hotel/night",
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                  inputFormatters: <TextInputFormatter>[
+                                    WhitelistingTextInputFormatter(
+                                        RegExp(r"^\d+(\.\d*)?")),
+                                  ],
+                                  validator: (value) {
+                                    if (value.trim().isEmpty) {
+                                      return "This field cannot be empty";
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.number,
+                                  autocorrect: true,
+                                  autofocus: false,
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 0.03 * deviceHeight,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "No. of meals/day:",
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                                fontSize: 0.035 * deviceWidth,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          TextFormField(
+                            enabled: _toggleEdit,
+                            controller: _noOfMealsPerDayController,
+                            decoration: InputDecoration(
+                              hintText: "No. of meals/day",
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ),
+                            inputFormatters: <TextInputFormatter>[
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            validator: (value) {
+                              if (value.trim().isEmpty) {
+                                return "This field cannot be empty";
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            autocorrect: true,
+                            autofocus: false,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 0.03 * deviceHeight,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "Fuel price/litre:",
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                                fontSize: 0.035 * deviceWidth,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          TextFormField(
+                            enabled: _toggleEdit,
+                            controller: _fuelPricePerLitreController,
+                            decoration: InputDecoration(
+                              hintText: "Fuel price/litre",
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ),
+                            inputFormatters: <TextInputFormatter>[
+                              WhitelistingTextInputFormatter(
+                                  RegExp(r"^\d+(\.\d*)?")),
+                            ],
+                            validator: (value) {
+                              if (value.trim().isEmpty) {
+                                return "This field cannot be empty";
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            autocorrect: true,
+                            autofocus: false,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.bodyText1.color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 0.05 * deviceHeight,
+                      ),
+                    ],
                   ),
-                  inputFormatters: <TextInputFormatter>[
-                    WhitelistingTextInputFormatter.digitsOnly
-                  ],
-                  validator: (value) {
-                    if (value.trim().isEmpty) {
-                      return "This field cannot be empty";
-                    }
-                    return null;
-                  },
-                  keyboardType: TextInputType.number,
-                  autocorrect: true,
-                  autofocus: false,
-                  style: GoogleFonts.montserrat(
-                    textStyle: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText1.color,
-                    ),
-                  ),
                 ),
-                SizedBox(
-                  height: 0.04 * deviceHeight,
-                ),
-                // TODO: Add multiple vehicles
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
@@ -489,9 +739,10 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
                   children: <Widget>[
                     Flexible(
                       child: TextFormField(
-                        controller: _vehicleNameController,
+                        enabled: _toggleEdit,
+                        controller: _vehicleNameControllerOne,
                         decoration: InputDecoration(
-                          hintText: "Vehicle name",
+                          hintText: "1st Vehicle name",
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
                                 color: Theme.of(context).primaryColor),
@@ -518,9 +769,10 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
                     ),
                     Flexible(
                       child: TextFormField(
-                        controller: _vehicleMileageController,
+                        enabled: _toggleEdit,
+                        controller: _vehicleMileageControllerOne,
                         decoration: InputDecoration(
-                          hintText: "Vehicle mileage",
+                          hintText: "1st Vehicle mileage",
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
                                 color: Theme.of(context).primaryColor),
@@ -541,10 +793,283 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
                         autofocus: false,
                         style: GoogleFonts.montserrat(
                           textStyle: TextStyle(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .color,
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 0.03 * deviceHeight,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleNameControllerTwo,
+                        decoration: InputDecoration(
+                          hintText: "2nd Vehicle name",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Please enter a valid vehicle name";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.text,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 0.015 * deviceWidth,
+                    ),
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleMileageControllerTwo,
+                        decoration: InputDecoration(
+                          hintText: "2nd Vehicle mileage",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "This field cannot be empty";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 0.03 * deviceHeight,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleNameControllerThree,
+                        decoration: InputDecoration(
+                          hintText: "3rd Vehicle name",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Please enter a valid vehicle name";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.text,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 0.015 * deviceWidth,
+                    ),
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleMileageControllerThree,
+                        decoration: InputDecoration(
+                          hintText: "3rd Vehicle mileage",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "This field cannot be empty";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 0.03 * deviceHeight,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleNameControllerFour,
+                        decoration: InputDecoration(
+                          hintText: "4th Vehicle name",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Please enter a valid vehicle name";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.text,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 0.015 * deviceWidth,
+                    ),
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleMileageControllerFour,
+                        decoration: InputDecoration(
+                          hintText: "4th Vehicle mileage",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "This field cannot be empty";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 0.03 * deviceHeight,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleNameControllerFive,
+                        decoration: InputDecoration(
+                          hintText: "5th Vehicle name",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Please enter a valid vehicle name";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.text,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 0.015 * deviceWidth,
+                    ),
+                    Flexible(
+                      child: TextFormField(
+                        enabled: _toggleEdit,
+                        controller: _vehicleMileageControllerFive,
+                        decoration: InputDecoration(
+                          hintText: "5th Vehicle mileage",
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter(
+                              RegExp(r"^\d+(\.\d*)?")),
+                        ],
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "This field cannot be empty";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
+                        autocorrect: true,
+                        autofocus: false,
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
                           ),
                         ),
                       ),
@@ -562,4 +1087,3 @@ class _UpdateInitialSettingsPageState extends State<UpdateInitialSettingsPage> {
     );
   }
 }
-
