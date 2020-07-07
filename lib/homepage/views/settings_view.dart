@@ -128,7 +128,7 @@ class _SettingsViewState extends State<SettingsView> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: InkWell(
               onTap: () {
-                Fluttertoast.showToast(
+                FlutterToast.showToast(
                     msg: "Coming soon...",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.CENTER,
@@ -203,7 +203,7 @@ class _SettingsViewState extends State<SettingsView> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: InkWell(
               onTap: () {
-                Fluttertoast.showToast(
+                FlutterToast.showToast(
                     msg: "Coming soon...",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.CENTER,
@@ -278,7 +278,7 @@ class _SettingsViewState extends State<SettingsView> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: InkWell(
               onTap: () {
-                Fluttertoast.showToast(
+                FlutterToast.showToast(
                     msg: "Coming soon...",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.CENTER,

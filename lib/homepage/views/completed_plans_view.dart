@@ -6,6 +6,7 @@ import 'package:xpedition/homepage/views/widgets/plan_card.dart';
 
 class CompletedPlansView extends StatefulWidget {
   final List<NewPlanDataWithId> completedPlanDataList;
+
   CompletedPlansView({@required this.completedPlanDataList});
 
   @override
@@ -84,7 +85,6 @@ class _CompletedPlansViewState extends State<CompletedPlansView> {
         ),
         body: Column(
           children: <Widget>[
-
             Container(
               height: 0.85 * deviceHeight,
               padding: EdgeInsets.only(
@@ -93,44 +93,45 @@ class _CompletedPlansViewState extends State<CompletedPlansView> {
                 top: 0.001 * deviceWidth,
                 bottom: 0.025 * deviceWidth,
               ),
-              child: (_completedPlanDataList.length > 0) ? ListView.builder(
-                itemCount: _completedPlanDataList.length,
-                itemBuilder: (context, i) {
-                  return PlanCard(
-                    newPlanDataWithId: _completedPlanDataList[i],
-                    source: _completedPlanDataList[i].source,
-                    destination: _completedPlanDataList[i].destination,
-                    beginDate: _completedPlanDataList[i].beginDate,
-                    hrs: getHours(_completedPlanDataList[i]
-                        .totalDistance),
-                    mins: getMins(_completedPlanDataList[i]
-                        .totalDistance),
-                    days: _completedPlanDataList[i]
-                        .totalNoOfDays,
-                    totalDistance: _completedPlanDataList[i]
-                        .totalDistance,
-                    isPlanActive: false,
-                    isPlanComplete: true,
-                    alreadyHasAnActivePlan: _hasActivePlan,
-                    callBackFunction: () {
-                      setState(() {
-                        _updateListViewData();
-                      });
-                    },
-                  );
-                },
-              ) : Container(
-                child: Center(
-                  child: Text(
-                    "No plans to show",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontSize: 0.02 * deviceWidth,
+              child: (_completedPlanDataList.length > 0)
+                  ? ListView.builder(
+                      itemCount: _completedPlanDataList.length,
+                      itemBuilder: (context, i) {
+                        return PlanCard(
+                          newPlanDataWithId: _completedPlanDataList[i],
+                          source: _completedPlanDataList[i].source,
+                          destination: _completedPlanDataList[i].destination,
+                          beginDate: _completedPlanDataList[i].beginDate,
+                          hrs:
+                              getHours(_completedPlanDataList[i].totalDistance),
+                          mins:
+                              getMins(_completedPlanDataList[i].totalDistance),
+                          days: _completedPlanDataList[i].totalNoOfDays,
+                          totalDistance:
+                              _completedPlanDataList[i].totalDistance,
+                          isPlanActive: false,
+                          isPlanComplete: true,
+                          alreadyHasAnActivePlan: _hasActivePlan,
+                          callBackFunction: () {
+                            setState(() {
+                              _updateListViewData();
+                            });
+                          },
+                        );
+                      },
+                    )
+                  : Container(
+                      child: Center(
+                        child: Text(
+                          "No plans to show",
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              fontSize: 0.02 * deviceWidth,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ],
         ),

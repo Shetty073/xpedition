@@ -38,7 +38,7 @@ dependencies:
   intl: ^0.16.1
   autocomplete_textfield: ^1.7.3
   firebase_messaging: ^6.0.16
-  fluttertoast: ^4.0.0
+  fluttertoast: ^5.0.1
   package_info: '>=0.4.1 <2.0.0'
 
 dev_dependencies:

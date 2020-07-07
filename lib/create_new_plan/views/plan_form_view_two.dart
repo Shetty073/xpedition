@@ -5,12 +5,17 @@ import 'package:intl/intl.dart';
 import 'package:xpedition/data_models/with_id/user_data_with_id.dart';
 
 class PlanFormViewTwo extends StatefulWidget {
-  final TextEditingController dateController, noOfDaysController, distanceController;
+  final TextEditingController dateController,
+      noOfDaysController,
+      distanceController;
 
   final List<UserDataWithId> myUserData;
 
   PlanFormViewTwo(
-      {@required this.dateController, @required this.noOfDaysController, @required this.myUserData, @required this.distanceController});
+      {@required this.dateController,
+      @required this.noOfDaysController,
+      @required this.myUserData,
+      @required this.distanceController});
 
   @override
   _PlanFormViewTwoState createState() => _PlanFormViewTwoState();
@@ -48,14 +53,15 @@ class _PlanFormViewTwoState extends State<PlanFormViewTwo> {
   }
 
   void _totalTripDays() {
-    double tNoDays = (double.parse(widget.distanceController.text) / widget.myUserData[0].maxKmInOneDay);
+    double tNoDays = (double.parse(widget.distanceController.text) /
+        widget.myUserData[0].maxKmInOneDay);
     String totalTripDays = tNoDays.toString();
     List<String> decSplit;
     decSplit = totalTripDays.split(".");
     int preDec, postDec, totalDays;
     preDec = int.parse(decSplit[0]);
     postDec = int.parse(decSplit[1]);
-    if(postDec != 0) {
+    if (postDec != 0) {
       totalDays = preDec + 1;
     } else {
       totalDays = preDec;

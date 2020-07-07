@@ -7,7 +7,10 @@ class VehicleDataWithId {
   final String vehicleName;
   final double vehicleMileage;
 
-  VehicleDataWithId({@required this.id, @required this.vehicleName, @required this.vehicleMileage});
+  VehicleDataWithId(
+      {@required this.id,
+      @required this.vehicleName,
+      @required this.vehicleMileage});
 
   Map<String, dynamic> toMap() {
     return {

@@ -4,7 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 class KeyValueRow extends StatefulWidget {
   final TextEditingController myController;
-  final bool toggleEdit, onTapCallbackNeeded, readOnly, onChangeCallbackNeeded, isTotal;
+  final bool toggleEdit,
+      onTapCallbackNeeded,
+      readOnly,
+      onChangeCallbackNeeded,
+      isTotal;
   final String keyText, errorText;
   final TextInputType textInputType;
 
@@ -55,8 +59,12 @@ class _KeyValueRowState extends State<KeyValueRow> {
           ),
           Flexible(
             child: TextFormField(
-              onTap: widget.onTapCallbackNeeded ? widget.onTapCallbackFunction : () {},
-              onChanged: widget.onChangeCallbackNeeded ? widget.onChangeCallbackFunction : (val){},
+              onTap: widget.onTapCallbackNeeded
+                  ? widget.onTapCallbackFunction
+                  : () {},
+              onChanged: widget.onChangeCallbackNeeded
+                  ? widget.onChangeCallbackFunction
+                  : (val) {},
               enabled: widget.toggleEdit,
               readOnly: widget.readOnly,
               controller: widget.myController,
@@ -90,7 +98,9 @@ class _KeyValueRowState extends State<KeyValueRow> {
               style: GoogleFonts.montserrat(
                 textStyle: TextStyle(
                   color: Theme.of(context).textTheme.bodyText1.color,
-                  fontWeight: (widget.isTotal == null) ? FontWeight.normal : FontWeight.bold,
+                  fontWeight: (widget.isTotal == null)
+                      ? FontWeight.normal
+                      : FontWeight.bold,
                 ),
               ),
             ),

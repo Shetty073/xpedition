@@ -217,17 +217,18 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
     NewPlanData newPlanData = _prepareDataForInsertion();
     _dbHelper.insertNewPlanData(newPlanData).then((value) => {
           _dbHelper.getUserData().then((userDataList) => {
-            _dbHelper.getVehicleData().then((vehicleDataList) =>
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HomePage(
-                      myUserDataWithId: userDataList[0],
-                      vehicleDataWithIdList: vehicleDataList,
-                    ),
-                  ),
-                )),
-          }),
+                _dbHelper
+                    .getVehicleData()
+                    .then((vehicleDataList) => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(
+                              myUserDataWithId: userDataList[0],
+                              vehicleDataWithIdList: vehicleDataList,
+                            ),
+                          ),
+                        )),
+              }),
         });
     Navigator.pop(context);
   }

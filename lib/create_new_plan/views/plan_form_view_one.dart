@@ -1,7 +1,7 @@
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlanFormViewOne extends StatefulWidget {
@@ -97,7 +97,9 @@ class _PlanFormViewOneState extends State<PlanFormViewOne> {
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Theme.of(context).primaryColor),
               ),
-              errorText: _fromTextError ? "Please enter start location for your trip" :  null,
+              errorText: _fromTextError
+                  ? "Please enter start location for your trip"
+                  : null,
               errorStyle: TextStyle(
                 color: Colors.red,
               ),
@@ -125,7 +127,9 @@ class _PlanFormViewOneState extends State<PlanFormViewOne> {
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Theme.of(context).primaryColor),
               ),
-              errorText: _toTextError ? "Please enter destination location for your trip" :  null,
+              errorText: _toTextError
+                  ? "Please enter destination location for your trip"
+                  : null,
               errorStyle: TextStyle(
                 color: Colors.red,
               ),

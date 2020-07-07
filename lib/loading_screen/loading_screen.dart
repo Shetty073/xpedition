@@ -24,18 +24,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
         const Duration(microseconds: 2500),
         () {
           _myDbHelper.getUserData().then((userDataList) => {
-            _myDbHelper.getVehicleData().then((vehicleDataList) => {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(
-                    myUserDataWithId: userDataList[0],
-                    vehicleDataWithIdList: vehicleDataList,
-                  ),
-                ),
-              ),
-            }),
-          });
+                _myDbHelper.getVehicleData().then((vehicleDataList) => {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(
+                            myUserDataWithId: userDataList[0],
+                            vehicleDataWithIdList: vehicleDataList,
+                          ),
+                        ),
+                      ),
+                    }),
+              });
         },
       );
     } else {

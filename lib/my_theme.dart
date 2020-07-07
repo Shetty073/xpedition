@@ -59,6 +59,5 @@ final darkTheme = ThemeData.dark().copyWith(
     bodyText2: TextStyle(
       color: Colors.white,
     ),
-
   ),
 );

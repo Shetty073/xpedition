@@ -15,14 +15,14 @@ class QueryHelper {
   }
 
   Future<List<NewPlanDataWithId>> getActivePlanDataFromDatabase() async {
-    List<NewPlanDataWithId> activePlansList = await _myDbHelper.getActivePlanData();
+    List<NewPlanDataWithId> activePlansList =
+        await _myDbHelper.getActivePlanData();
     return activePlansList;
   }
 
   Future<List<NewPlanDataWithId>> getCompletedPlanDataFromDatabase() async {
-    List<NewPlanDataWithId> completedPlansList = await _myDbHelper.getCompletedPlanData();
+    List<NewPlanDataWithId> completedPlansList =
+        await _myDbHelper.getCompletedPlanData();
     return completedPlansList;
   }
-
 }
-

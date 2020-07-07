@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyVerticalDivider extends StatefulWidget {
-  final double sidedBoxHeight,
-      leftGap,
-      rightGap,
-      dividerWidth;
+  final double sidedBoxHeight, leftGap, rightGap, dividerWidth;
 
   MyVerticalDivider(
       {@required this.sidedBoxHeight,

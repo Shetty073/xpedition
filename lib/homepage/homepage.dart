@@ -223,27 +223,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: (_currPageIndex == 0) ? FloatingActionButton(
-          backgroundColor: Theme.of(context).secondaryHeaderColor,
-          splashColor: Theme.of(context).secondaryHeaderColor.withAlpha(50),
-          child: IconTheme(
-            data: IconThemeData(
-              color: Colors.white,
-            ),
-            child: Icon(Icons.add),
-          ),
-          onPressed: () {
-            // go to create new plan page
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreateNewPlan(
-                  myPref: _myPref,
+        floatingActionButton: (_currPageIndex == 0)
+            ? FloatingActionButton(
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                splashColor:
+                    Theme.of(context).secondaryHeaderColor.withAlpha(50),
+                child: IconTheme(
+                  data: IconThemeData(
+                    color: Colors.white,
+                  ),
+                  child: Icon(Icons.add),
                 ),
-              ),
-            );
-          },
-        ) : null,
+                onPressed: () {
+                  // go to create new plan page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateNewPlan(
+                        myPref: _myPref,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : null,
         bottomNavigationBar: BottomAppBar(
           shape: CircularNotchedRectangle(),
           notchMargin: 4.0,

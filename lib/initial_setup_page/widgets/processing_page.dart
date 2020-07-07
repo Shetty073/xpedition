@@ -29,4 +29,3 @@ class _ProcessingPageState extends State<ProcessingPage> {
     );
   }
 }
-
