@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final deviceWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text(
             (_currPageIndex == 0) ? "Xpedition" : "Settings",

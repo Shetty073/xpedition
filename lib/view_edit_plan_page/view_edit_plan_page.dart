@@ -918,7 +918,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         },
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1025,7 +1025,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.text,
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1039,7 +1039,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1054,7 +1054,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1071,7 +1071,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         },
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1121,7 +1121,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1135,7 +1135,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1149,7 +1149,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1201,7 +1201,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1215,7 +1215,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                       ),
@@ -1265,7 +1265,7 @@ class _ViewEditPlanPageState extends State<ViewEditPlanPage> {
                         onChangeCallbackNeeded: false,
                         textInputType: TextInputType.numberWithOptions(),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter(
+                          FilteringTextInputFormatter.allow(
                               RegExp(r"^\d+(\.\d*)?")),
                         ],
                         isTotal: true,

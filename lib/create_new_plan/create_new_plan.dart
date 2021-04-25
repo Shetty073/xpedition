@@ -76,7 +76,7 @@ class _CreateNewPlanState extends State<CreateNewPlan> {
     double deviceWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         body: Container(
           child: Column(
             children: <Widget>[

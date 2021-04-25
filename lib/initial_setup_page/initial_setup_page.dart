@@ -272,7 +272,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                           ),
                         ),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.allow(RegExp(r"^[0-9]+$")),
                         ],
                         validator: (value) {
                           if (value.trim().isEmpty) {
@@ -306,7 +306,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
-                                WhitelistingTextInputFormatter(
+                                FilteringTextInputFormatter.allow(
                                     RegExp(r"^\d+(\.\d*)?")),
                               ],
                               validator: (value) {
@@ -342,7 +342,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
-                                WhitelistingTextInputFormatter(
+                                FilteringTextInputFormatter.allow(
                                     RegExp(r"^\d+(\.\d*)?")),
                               ],
                               validator: (value) {
@@ -383,7 +383,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
-                                WhitelistingTextInputFormatter(
+                                FilteringTextInputFormatter.allow(
                                     RegExp(r"^\d+(\.\d*)?")),
                               ],
                               validator: (value) {
@@ -419,7 +419,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                                 ),
                               ),
                               inputFormatters: <TextInputFormatter>[
-                                WhitelistingTextInputFormatter(
+                                FilteringTextInputFormatter.allow(
                                     RegExp(r"^\d+(\.\d*)?")),
                               ],
                               validator: (value) {
@@ -456,7 +456,7 @@ class _InitialSetupPageState extends State<InitialSetupPage> {
                           ),
                         ),
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.allow(RegExp(r"^[0-9]+$")),
                         ],
                         validator: (value) {
                           if (value.trim().isEmpty) {

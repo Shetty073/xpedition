@@ -295,7 +295,7 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
               ),
             ),
             inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter(RegExp(r"^\d+(\.\d*)?")),
+              FilteringTextInputFormatter.allow(RegExp(r"^\d+(\.\d*)?")),
             ],
             validator: (value) {
               if (value.trim().isEmpty) {
@@ -324,7 +324,7 @@ class _PlanFormViewThreeState extends State<PlanFormViewThree> {
               ),
             ),
             inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter(RegExp(r"^\d+(\.\d*)?")),
+              FilteringTextInputFormatter.allow(RegExp(r"^\d+(\.\d*)?")),
             ],
             validator: (value) {
               if (value.trim().isEmpty) {
